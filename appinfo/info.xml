@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<info>
+    <id>popularitycontestserver</id>
+    <name>Popularity Contest Server</name>
+    <description>Collects information from other ownCloud servers about enabled apps, settings, etc and visualize them</description>
+    <licence>AGPL</licence>
+    <author>Bjoern Schiessle</author>
+    <version>0.0.1</version>
+    <namespace>PopularityContestServer</namespace>
+    <category>other</category>
+    <dependencies>
+        <owncloud min-version="8.1" />
+    </dependencies>
+</info>
