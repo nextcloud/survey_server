@@ -1,53 +1,44 @@
 <?php
 /**
- * ownCloud - popularitycontestserver
+ * @author Björn Schießle <schiessle@owncloud.com>
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the COPYING file.
+ * @copyright Copyright (c) 2015, ownCloud, Inc.
+ * @license AGPL-3.0
  *
- * @author Bjoern Schiessle <schiessle@owncloud.com>
- * @copyright Bjoern Schiessle 2015
+ * This code is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License, version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License, version 3,
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ *
  */
+
 
 namespace OCA\PopularityContestServer\Controller;
 
+use OCA\PopularityContestServer\Service\StatisticService;
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 
 class PageController extends Controller {
 
-
-	private $userId;
-
-	public function __construct($AppName, IRequest $request, $UserId){
+	public function __construct($AppName, IRequest $request, StatisticService $service){
 		parent::__construct($AppName, $request);
-		$this->userId = $UserId;
 	}
 
 	/**
-	 * CAUTION: the @Stuff turns off security checks; for this page no admin is
-	 *          required and no CSRF check. If you don't know what CSRF is, read
-	 *          it up in the docs or you might create a security hole. This is
-	 *          basically the only required method to add this exemption, don't
-	 *          add it to any other method if you don't exactly know what it does
-	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
 	public function index() {
-		$params = ['user' => $this->userId];
-		return new TemplateResponse('popularitycontestserver', 'main', $params);  // templates/main.php
+		return new TemplateResponse('popularitycontestserver', 'main', []);
 	}
-
-	/**
-	 * Simply method that posts back the payload of the request
-	 * @NoAdminRequired
-	 */
-	public function doEcho($echo) {
-		return new DataResponse(['echo' => $echo]);
-	}
-
 
 }

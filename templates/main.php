@@ -1,5 +1,6 @@
 <?php
 script('popularitycontestserver', 'script');
+vendor_script('popularitycontestserver', 'Chart');
 style('popularitycontestserver', 'style');
 ?>
 

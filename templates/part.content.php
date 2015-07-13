@@ -1,10 +1,30 @@
-<p>Hello World <?php p($_['user']) ?></p>
+<div id="surveyResults">
 
-<p><button id="hello">click me</button></p>
+	<div class="section" id="generalStatistics">
+		<h1>General Statistics</h1>
 
-<p><textarea id="echo-content">
-	Send this as ajax
-</textarea></p>
-<p><button id="echo">Send ajax request</button></p>
+		<p id="instances">Counted ownCloud installations: <span></span></p>
+		<br />
+		<p id="maxUsers">Number of user (largest installation): <span></span></p>
+		<br />
+		<p id="minUsers">Number of users (smallest installation): <span></span></p>
+		<br />
+		<p id="averageUsers">Number of user (average): <span></span></p>
+	</div>
 
-Ajax response: <div id="echo-result"></div>
+	<div class="section" id="enabledApps">
+		<h1>Enabled Apps</h1>
+		<canvas id="appChart" width="800" height="400"></canvas>
+	</div>
+
+	<div class="section" id="phpVersions">
+		<h1>PHP Version</h1>
+		<canvas id="phpChart" width="400" height="300"></canvas>
+	</div>
+
+	<div class="section" id="ocVersions">
+		<h1>ownCloud Version</h1>
+		<canvas id="ocVersionChart" width="400" height="300"></canvas>
+	</div>
+
+</div>
