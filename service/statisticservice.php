@@ -52,7 +52,7 @@ class StatisticService {
 		$query = $this->connection->getQueryBuilder();
 		$query->insert($this->table);
 		$source = $data['id'];
-		$timestamp = $data['timestamp'];
+		$timestamp = time();
 		$this->removeOldStatistics($source);
 		foreach ($data['items'] as $item) {
 				$query->values(
