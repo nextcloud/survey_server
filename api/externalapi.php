@@ -20,36 +20,58 @@
  */
 
 
-namespace OCA\PopularityContestServer\Controller;
+namespace OCA\PopularityContestServer\Api;
 
 
 use OCA\PopularityContestServer\Service\StatisticService;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
-class ApiController extends \OCP\AppFramework\ApiController {
+class ExternalApi {
+
+	/** @var IRequest */
+	private $request;
+
+	/** @var StatisticService */
+	private $service;
 
 	/**
-	 * @param string $AppName
+	 * OCSAuthAPI constructor.
+	 *
 	 * @param IRequest $request
 	 * @param StatisticService $service
 	 */
-	public function __construct($AppName, IRequest $request,
-								StatisticService $service){
-		parent::__construct($AppName, $request);
+	public function __construct(
+		IRequest $request,
+		StatisticService $service
+	) {
+		$this->request = $request;
 		$this->service = $service;
 	}
 
 	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
+	 * request received to ask remote server for a shared secret
 	 *
-	 * @return DataResponse
+	 * @return \OC_OCS_Result
 	 */
-	public function get() {
-		$result = $this->service->get();
-		return new DataResponse($result);
+	public function receiveSurveyResults() {
+
+		$data = $this->request->getParam('data');
+
+		$array = json_decode($data, true);
+
+		if ($array === null) {
+			return new \OC_OCS_Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
+		}
+
+		try {
+			$this->service->add($array);
+		} catch (\Exception $e) {
+			return new \OC_OCS_Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
+		}
+
+		return new \OC_OCS_Result(null, Http::STATUS_OK);
+
 	}
 
 }

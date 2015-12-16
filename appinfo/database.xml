@@ -15,8 +15,7 @@
 			</field>
 			<field>
 				<name>key</name>
-				<type>integer</type>
-				<default>-1</default>
+				<type>text</type>
 				<notnull>true</notnull>
 				<length>512</length>
 			</field>
@@ -24,7 +23,7 @@
 				<name>value</name>
 				<type>text</type>
 				<notnull>true</notnull>
-				<length>512</length>
+				<length>1024</length>
 			</field>
 			<field>
 				<name>source</name>
@@ -32,6 +31,12 @@
 				<notnull>true</notnull>
 				<length>512</length>
 				<comments>source who reported the data</comments>
+			</field>
+			<field>
+				<name>timestamp</name>
+				<type>timestamp</type>
+				<default></default>
+				<notnull>false</notnull>
 			</field>
 			<index>
 				<name>sh_popularity_contest</name>

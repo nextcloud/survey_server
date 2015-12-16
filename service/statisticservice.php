@@ -23,16 +23,16 @@
 namespace OCA\PopularityContestServer\Service;
 
 
-use Doctrine\DBAL\Query\QueryBuilder;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 class StatisticService {
 
-	/** @var  \OC\DB\Connection */
+	/** @var  IDBConnection */
 	protected $connection;
 
 	/** @var string	*/
-	protected $table = '`*PREFIX*popularity_contest`';
+	protected $table = 'popularity_contest';
 
 	/**
 	 * @param IDBConnection $connection
@@ -49,49 +49,24 @@ class StatisticService {
 	public function add($data) {
 
 		$this->connection->beginTransaction();
-		$query = $this->connection->createQueryBuilder();
+		$query = $this->connection->getQueryBuilder();
 		$query->insert($this->table);
 		$source = $data['id'];
+		$timestamp = $data['timestamp'];
 		$this->removeOldStatistics($source);
-		$this->addEnabledApps($source, $data['apps'], $query);
-		unset($data['id']);
-		unset($data['apps']);
-		foreach ($data as $category => $settings) {
-			foreach ($settings as $key => $value) {
+		foreach ($data['items'] as $item) {
 				$query->values(
 					[
-						'`source`' => $query->expr()->literal($source),
-						'`category`' => $query->expr()->literal($category),
-						'`key`' => $query->expr()->literal($key),
-						'`value`' => $query->expr()->literal($value),
+						'source' => $query->createNamedParameter($source),
+						'timestamp' => $query->createNamedParameter($timestamp),
+						'category' => $query->createNamedParameter($item[0]),
+						'key' => $query->createNamedParameter($item[1]),
+						'value' => $query->createNamedParameter($item[2])
 					]
 				);
 				$query->execute();
-			}
 		}
 		$this->connection->commit();
-
-	}
-
-	/**
-	 * add enabled apps to database
-	 *
-	 * @param string $source
-	 * @param array $apps
-	 * @param QueryBuilder $query
-	 */
-	private function addEnabledApps($source, $apps, QueryBuilder $query) {
-		foreach ($apps as $app) {
-			$query->values(
-				[
-					'`source`' => $query->expr()->literal($source),
-					'`category`' => $query->expr()->literal('apps'),
-					'`key`' => $query->expr()->literal('enabled'),
-					'`value`' => $query->expr()->literal($app),
-				]
-			);
-			$query->execute();
-		}
 
 	}
 
@@ -101,7 +76,7 @@ class StatisticService {
 	 * @param string $source
 	 */
 	protected function removeOldStatistics($source) {
-		$query = $this->connection->createQueryBuilder();
+		$query = $this->connection->getQueryBuilder();
 		$query->delete($this->table)
 			->where($query->expr()->eq('source', ':source'))
 			->setParameter('source', $source)->execute();
@@ -144,7 +119,7 @@ class StatisticService {
 	 * @return array
 	 */
 	private function getUserStatistics() {
-		$statistics = $this->connection->createQueryBuilder();
+		$statistics = $this->connection->getQueryBuilder();
 		$expr = $statistics->expr();
 
 		$result = $statistics
@@ -160,12 +135,12 @@ class StatisticService {
 	 * get statistics stored in database.
 	 * Counts how often a "value" was reported for a specific category and key
 	 *
-	 * @param $category the category of the setting, e.g. 'apps' or 'system'
-	 * @param $key the key of the settings, e.g. 'enabled' or 'ocversion'
+	 * @param string $category the category of the setting, e.g. 'apps' or 'system'
+	 * @param string $key the key of the settings, e.g. 'enabled' or 'ocversion'
 	 * @return array
 	 */
 	private function getStatistics($category, $key) {
-		$statistics = $this->connection->createQueryBuilder();
+		$statistics = $this->connection->getQueryBuilder();
 		$expr = $statistics->expr();
 
 		$stats = $statistics

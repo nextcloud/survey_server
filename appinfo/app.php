@@ -21,9 +21,8 @@
 
 namespace OCA\PopularityContestServer\AppInfo;
 
-use OCP\AppFramework\App;
-
-$app = new App('popularitycontestserver');
+$app = new Application();
+$app->registerOCSApi();
 $container = $app->getContainer();
 
 $container->query('OCP\INavigationManager')->add(function () use ($container) {
