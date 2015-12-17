@@ -34,9 +34,10 @@
 			</field>
 			<field>
 				<name>timestamp</name>
-				<type>timestamp</type>
-				<default></default>
-				<notnull>false</notnull>
+				<type>integer</type>
+				<default>0</default>
+				<notnull>true</notnull>
+				<length>4</length>
 			</field>
 			<index>
 				<name>sh_popularity_contest</name>
