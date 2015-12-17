@@ -47,23 +47,26 @@ class StatisticService {
 	 * @param array $data
 	 */
 	public function add($data) {
+		$source = $data['id'];
+		$timestamp = time();
 
 		$this->connection->beginTransaction();
 		$query = $this->connection->getQueryBuilder();
-		$query->insert($this->table);
-		$source = $data['id'];
-		$timestamp = time();
+		$query->insert($this->table)
+			->values(
+				[
+					'source' => $query->createNamedParameter($source),
+					'timestamp' => $query->createNamedParameter($timestamp),
+					'category' => $query->createParameter('category'),
+					'key' => $query->createParameter('key'),
+					'value' => $query->createParameter('value')
+				]
+			);
 		$this->removeOldStatistics($source);
 		foreach ($data['items'] as $item) {
-				$query->values(
-					[
-						'source' => $query->createNamedParameter($source),
-						'timestamp' => $query->createNamedParameter($timestamp),
-						'category' => $query->createNamedParameter($item[0]),
-						'key' => $query->createNamedParameter($item[1]),
-						'value' => $query->createNamedParameter($item[2])
-					]
-				);
+				$query->setParameter('category', $item[0])
+					->setParameter('key', $item[1])
+					->setParameter('value', $item[2]);
 				$query->execute();
 		}
 		$this->connection->commit();
@@ -78,8 +81,8 @@ class StatisticService {
 	protected function removeOldStatistics($source) {
 		$query = $this->connection->getQueryBuilder();
 		$query->delete($this->table)
-			->where($query->expr()->eq('source', ':source'))
-			->setParameter('source', $source)->execute();
+			->where($query->expr()->eq('source', $query->createNamedParameter($source)))
+			->execute();
 
 	}
 
