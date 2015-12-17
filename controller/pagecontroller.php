@@ -29,8 +29,20 @@ use OCP\AppFramework\Controller;
 
 class PageController extends Controller {
 
+	/** @var StatisticService */
+	protected $service;
+
+	/**
+	 * PageController constructor.
+	 *
+	 * @param string $AppName
+	 * @param IRequest $request
+	 * @param StatisticService $service
+	 */
 	public function __construct($AppName, IRequest $request, StatisticService $service){
 		parent::__construct($AppName, $request);
+
+		$this->service = $service;
 	}
 
 	/**
@@ -38,7 +50,8 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index() {
-		return new TemplateResponse('popularitycontestserver', 'main', []);
+		$statistics = $this->service->get();
+		return new TemplateResponse('popularitycontestserver', 'main', $statistics);
 	}
 
 }

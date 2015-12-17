@@ -17,14 +17,14 @@
 		<canvas id="appChart" width="800" height="400"></canvas>
 	</div>
 
-	<div class="section" id="phpVersions">
-		<h1>PHP Version</h1>
-		<canvas id="phpChart" width="400" height="300"></canvas>
-	</div>
-
-	<div class="section" id="ocVersions">
-		<h1>ownCloud Version</h1>
-		<canvas id="ocVersionChart" width="400" height="300"></canvas>
-	</div>
+	<?php foreach ($_['appStatistics'] as $category => $data) { ?>
+		<div class="section" id="<?php p('survey' . ucfirst($category)); ?>">
+			<h1><?php p(ucfirst($category));?></h1>
+			<?php foreach($data as $key => $value) { ?>
+				<h2><?php p(ucfirst($key));?></h2>
+				<canvas id="<?php p($category . $key . 'Chart');?>" width="400" height="300"></canvas>
+			<?php } ?>
+		</div>
+	<?php } ?>
 
 </div>

@@ -79,46 +79,24 @@
 		};
 
 		/**
-		 * draw the chart of php versions
-		 *
-		 * @param array data
-		 */
-		var phpVersionsChart = function (data) {
-			var phpVersionsData = new Array();
-			for (key in data) {
-				phpVersionsData.push(
-					{
-						value: data[key],
-						color: getRandomColor(),
-						label: 'PHP ' + key
-					}
-				);
-
-			}
-			var ctx = document.getElementById("phpChart").getContext("2d");
-			var myPieChart = new Chart(ctx).Pie(phpVersionsData);
-
-		};
-
-		/**
 		 * draw the chart of ownCloud versions
 		 *
 		 * @param array data
 		 */
-		var ocVersionsChart = function (data) {
-			var ocVersionsData = new Array();
+		var ocChart = function (id, data) {
+			var ocChartData = new Array();
 			for (key in data) {
-				ocVersionsData.push(
+				ocChartData.push(
 					{
 						value: data[key],
 						color: getRandomColor(),
-						label: 'ownCloud ' + key
+						label: key
 					}
 				);
 
 			}
-			var ctx = document.getElementById("ocVersionChart").getContext("2d");
-			var myPieChart = new Chart(ctx).Pie(ocVersionsData);
+			var ctx = document.getElementById(id).getContext("2d");
+			var myPieChart = new Chart(ctx).Pie(ocChartData);
 
 		};
 
@@ -126,10 +104,16 @@
 			OC.generateUrl('/apps/popularitycontestserver/api/v1/data'), {}
 		).done(
 			function (data) {
-				showGeneralStatistics(data['instances'], data['users']);
+				//showGeneralStatistics(data['instances'], data['users']);
 				appsChart(data['apps']);
-				phpVersionsChart(data['system']['phpversion']);
-				ocVersionsChart(data['system']['ocversion']);
+
+				for (category in data['appStatistics']) {
+					for(key in data['appStatistics'][category]) {
+						for (value in data['appStatistics'][category][key]) {
+							ocChart(category + key + 'Chart', data['appStatistics'][category][key]);
+						}
+					}
+				}
 			}
 		);
 

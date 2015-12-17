@@ -22,7 +22,6 @@
 
 namespace OCA\PopularityContestServer\Service;
 
-use OCA\PopularityContestServer\BackgroundJobs\ComputeStatistics;
 use OCP\IConfig;
 use OCP\IDBConnection;
 

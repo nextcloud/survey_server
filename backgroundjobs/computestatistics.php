@@ -174,10 +174,13 @@ class ComputeStatistics extends TimedJob {
 		$appsStatistics = [];
 		$categories = $this->getCategories();
 		foreach ($categories as $category) {
-			if ($category !== 'apps' && $category !== 'stats') {
+			if ($category['category'] !== 'apps' && $category['category'] !== 'stats') {
 				$keys = $this->getKeysOfCategory($category['category']);
 				foreach ($keys as $key) {
-					$appsStatistics[$category['category']] = $this->getGeneralStatistics($category['category'], $key['key']);
+					$generalStatistics = $this->getGeneralStatistics($category['category'], $key['key']);
+					foreach($generalStatistics as $statKey => $statValue) {
+						$appsStatistics[$category['category']][$statKey] = $statValue;
+					}
 				}
 			}
 		}
