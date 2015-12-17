@@ -22,8 +22,6 @@
 
 namespace OCA\PopularityContestServer\Service;
 
-
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 class StatisticService {
@@ -90,75 +88,10 @@ class StatisticService {
 	 */
 	public function get() {
 		$result = array();
+		$result['stats'] = $this->getSystemStatistics();
 		$result['instances'] = $this->getNumberOfInstances();
-		$result['users'] = $this->getUserStatistics();
-		$result['apps'] = $this->getStatistics('apps', 'enabled');
-		$result['system']['phpversion'] = $this->getStatistics('system', 'phpversion');
-		$result['system']['ocversion'] = $this->getStatistics('system', 'ocversion');
-
-		return $result;
-	}
-
-
-	/**
-	 * return number of instances stored in the database
-	 *
-	 * @return int
-	 */
-	private function getNumberOfInstances() {
-		$countInstances = $this->connection->createQueryBuilder();
-		$i = $countInstances->select('COUNT(DISTINCT `source`) as instances')
-			->from($this->table)->execute()->fetch();
-
-		return (int)$i['instances'];
-	}
-
-	/**
-	 * get user statistics
-	 *
-	 * @return array
-	 */
-	private function getUserStatistics() {
-		$statistics = $this->connection->getQueryBuilder();
-		$expr = $statistics->expr();
-
-		$result = $statistics
-			->select('AVG(`value`) AS average, MAX(`value`) as max, MIN(`value`) as min')
-			->from($this->table)
-			->where($expr->eq('`key`', $expr->literal('users')))
-			->andWhere($expr->eq('category', $expr->literal('system')))->execute()->fetch();
-
-		return $result;
-	}
-
-	/**
-	 * get statistics stored in database.
-	 * Counts how often a "value" was reported for a specific category and key
-	 *
-	 * @param string $category the category of the setting, e.g. 'apps' or 'system'
-	 * @param string $key the key of the settings, e.g. 'enabled' or 'ocversion'
-	 * @return array
-	 */
-	private function getStatistics($category, $key) {
-		$statistics = $this->connection->getQueryBuilder();
-		$expr = $statistics->expr();
-
-		$stats = $statistics
-			->select('`value`')
-			->from($this->table)
-			->where($expr->eq('`category`', $expr->literal($category)))
-			->andWhere($expr->eq('`key`', $expr->literal($key)))
-			->execute()->fetchAll();
-
-		$result = array();
-		foreach($stats as $s) {
-			if (isset($result[$s['value']])) {
-				$result[$s['value']] = $result[$s['value']] + 1;
-			} else {
-				$result[$s['value']] = 1;
-			}
-		}
-
+		$result['apps'] = $this->getApps();
+		$result['appStatistics'] = $this->getAppStatistics();
 		return $result;
 	}
 
