@@ -22,6 +22,8 @@
 
 namespace OCA\PopularityContestServer\Service;
 
+use OCA\PopularityContestServer\BackgroundJobs\ComputeStatistics;
+use OCP\IConfig;
 use OCP\IDBConnection;
 
 class StatisticService {
@@ -29,14 +31,18 @@ class StatisticService {
 	/** @var  IDBConnection */
 	protected $connection;
 
+	/** @var IConfig */
+	protected $config;
+
 	/** @var string	*/
 	protected $table = 'popularity_contest';
 
 	/**
 	 * @param IDBConnection $connection
 	 */
-	public function __construct(IDBConnection $connection) {
+	public function __construct(IDBConnection $connection, IConfig $config) {
 		$this->connection = $connection;
+		$this->config = $config;
 	}
 
 	/**
@@ -90,12 +96,8 @@ class StatisticService {
 	 * @return array
 	 */
 	public function get() {
-		$result = array();
-		$result['stats'] = $this->getSystemStatistics();
-		$result['instances'] = $this->getNumberOfInstances();
-		$result['apps'] = $this->getApps();
-		$result['appStatistics'] = $this->getAppStatistics();
-		return $result;
+		$data = $this->config->getAppValue('popularitycontestserver', 'evaluated_statistics', []);
+		return json_decode($data, true);
 	}
 
 }

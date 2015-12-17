@@ -24,15 +24,24 @@ namespace OCA\PopularityContestServer\BackgroundJobs;
 
 
 use OC\BackgroundJob\TimedJob;
+use OCP\IConfig;
 use OCP\IDBConnection;
 
 class ComputeStatistics extends TimedJob {
 
+	/** @var string	*/
+	protected $table = 'popularity_contest';
+
 	/** @var IDBConnection */
 	private $connection;
 
-	public function __construct(IDBConnection $connection = null) {
+	/** @var IConfig */
+	private $config;
+
+	public function __construct(IDBConnection $connection = null, IConfig $config = null) {
 		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
+		$this->config = $config = $config ? $config : \OC::$server->getConfig();
+		$this->setInterval(24 * 60 * 60);
 	}
 
 	protected function run($argument) {
@@ -42,7 +51,7 @@ class ComputeStatistics extends TimedJob {
 		$result['apps'] = $this->getApps();
 		$result['appStatistics'] = $this->getAppStatistics();
 
-		// TODO write to db
+		$this->config->setAppValue('popularitycontestserver', 'evaluated_statistics', json_encode($result));
 	}
 
 	/**
@@ -69,12 +78,15 @@ class ComputeStatistics extends TimedJob {
 			$result = $query
 				->select($query->createFunction('AVG(`value`) AS average, MAX(`value`) as max, MIN(`value`) as min'))
 				->from($this->table)
-				->where($query->expr()->eq('key', $query->createNamedParameter($key)))
+				->where($query->expr()->eq('key', $query->createNamedParameter($key['key'])))
 				->andWhere($query->expr()->eq('category', $query->createNamedParameter('stats')))
 				->execute();
-			$statistics[$key] = $result->fetchAll();
+			$data = $result->fetchAll();
+			$statistics[$key['key']] = $data[0];
 			$result->closeCursor();
 		}
+
+		return $statistics;
 
 	}
 
@@ -86,7 +98,7 @@ class ComputeStatistics extends TimedJob {
 	 */
 	private function getKeysOfCategory($category) {
 		$getKeys = $this->connection->getQueryBuilder();
-		$getKeys->selectDistinct('key')
+		$getKeys->selectDistinct('key')->from($this->table)
 			->where($getKeys->expr()->eq('category', $getKeys->createNamedParameter($category)));
 		$result = $getKeys->execute();
 		$keys = $result->fetchAll();
@@ -102,22 +114,12 @@ class ComputeStatistics extends TimedJob {
 	 * @return array
 	 */
 	private function getApps() {
-		return $this->getGeneralStatistics('apps');
-	}
-
-	/**
-	 * get statistics how often a specific key was reported for a given category
-	 *
-	 * @param $category
-	 * @return array
-	 */
-	private function getGeneralStatistics($category) {
 		$query = $this->connection->getQueryBuilder();
 
 		$result = $query
 			->select('key')
 			->from($this->table)
-			->where($query->expr()->eq('category', $query->createNamedParameter($category)))
+			->where($query->expr()->eq('category', $query->createNamedParameter('apps')))
 			->execute();
 		$keys = $result->fetchAll();
 		$result->closeCursor();
@@ -135,6 +137,37 @@ class ComputeStatistics extends TimedJob {
 	}
 
 	/**
+	 * get statistics how often a specific key was reported for a given category
+	 *
+	 * @param string $category
+	 * @param string $key
+	 * @return array
+	 */
+	private function getGeneralStatistics($category, $key) {
+		$query = $this->connection->getQueryBuilder();
+
+		$result = $query
+			->select('value')
+			->from($this->table)
+			->where($query->expr()->eq('category', $query->createNamedParameter($category)))
+			->andWhere($query->expr()->eq('key', $query->createNamedParameter($key)))
+			->execute();
+		$values = $result->fetchAll();
+		$result->closeCursor();
+
+		$statistics = [];
+		foreach ($values as $value) {
+			if (isset($statistics[$key][$value['value']])) {
+				$statistics[$key][$value['value']] = $statistics[$key][$value['value']] + 1;
+			} else {
+				$statistics[$key][$value['value']] = 1;
+			}
+		}
+
+		return $statistics;
+	}
+
+	/**
 	 * get remaining statistics beside 'apps' and 'stats'
 	 */
 	private function getAppStatistics() {
@@ -142,7 +175,10 @@ class ComputeStatistics extends TimedJob {
 		$categories = $this->getCategories();
 		foreach ($categories as $category) {
 			if ($category !== 'apps' && $category !== 'stats') {
-				$appsStatistics[$category] = $this->getGeneralStatistics($category);
+				$keys = $this->getKeysOfCategory($category['category']);
+				foreach ($keys as $key) {
+					$appsStatistics[$category['category']] = $this->getGeneralStatistics($category['category'], $key['key']);
+				}
 			}
 		}
 		return $appsStatistics;
@@ -155,7 +191,7 @@ class ComputeStatistics extends TimedJob {
 	 */
 	private function getCategories() {
 		$getCategories = $this->connection->getQueryBuilder();
-		$getCategories->selectDistinct('category');
+		$getCategories->selectDistinct('category')->from($this->table);
 		$result = $getCategories->execute();
 		$categories = $result->fetchAll();
 		$result->closeCursor();
