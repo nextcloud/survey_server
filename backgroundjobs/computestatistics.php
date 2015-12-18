@@ -140,6 +140,7 @@ class ComputeStatistics extends TimedJob {
 			->andWhere($query->expr()->eq('category', $query->createNamedParameter($category)))
 			->execute();
 		$data = $result->fetchAll();
+		$data[0]['average'] = round((float)$data[0]['average'], 2);
 		$statistics = $data[0];
 		$result->closeCursor();
 
