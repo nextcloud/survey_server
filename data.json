@@ -65,7 +65,7 @@
   },
   "max_execution_time" : {
     "type" : "integer",
-    "presentation" : "numerical evaluation",
+    "presentation" : "diagram",
     "description" : "Max Execution Time"
   },
   "upload_max_filesize" : {
