@@ -177,8 +177,8 @@ class ComputeStatistics extends TimedJob {
 			->select('key')
 			->from($this->table)
 			->where($query->expr()->eq('category', $query->createNamedParameter('apps')))
-
-					->execute();
+			->andWhere($query->expr()->neq('value', $query->createNamedParameter('disabled')))
+			->execute();
 		$keys = $result->fetchAll();
 		$result->closeCursor();
 
