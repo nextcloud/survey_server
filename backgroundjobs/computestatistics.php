@@ -121,7 +121,7 @@ class ComputeStatistics extends TimedJob {
 		$statistics = [];
 		foreach ($values as $value) {
 			if (isset($statistics[$value['value']])) {
-				$statistics[$value['value']] = $statistics[$key][$value['value']] + 1;
+				$statistics[$value['value']] = $statistics[$value['value']] + 1;
 			} else {
 				$statistics[$value['value']] = 1;
 			}
