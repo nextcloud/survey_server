@@ -51,7 +51,6 @@ class ComputeStatistics extends TimedJob {
 		$this->config = $config = $config ? $config : \OC::$server->getConfig();
 		$this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
 		$this->setInterval(24 * 60 * 60);
-		$this->run(null);
 	}
 
 	protected function run($argument) {

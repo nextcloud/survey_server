@@ -22,7 +22,6 @@
 
 namespace OCA\PopularityContestServer\Controller;
 
-use OCA\PopularityContestServer\BackgroundJobs\ComputeStatistics;
 use OCA\PopularityContestServer\Service\StatisticService;
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -51,7 +50,6 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index() {
-		new ComputeStatistics();
 		$statistics = $this->service->get();
 		return new TemplateResponse('popularitycontestserver', 'main', $statistics);
 	}
