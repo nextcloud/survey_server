@@ -33,10 +33,10 @@
 	</div>
 
 	<?php foreach ($_['categories'] as $category => $data) { ?>
-				
+
 		<?php if ($category !== 'stats') { ?>
 			<div class="section section-stats" id="<?php p('survey' . ucfirst($category)); ?>">
-			<h1><?php p(ucfirst($category));?></h1>
+			<h1><?php p(ucwords(str_replace('_', ' ', $category)));?></h1>
 			<?php foreach($data as $key => $value) { ?>
 				<?php if ($value['presentation'] === \OCA\PopularityContestServer\EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION) {?>
 					<h2><?php p(($value['description']));?></h2>
