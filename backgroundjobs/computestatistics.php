@@ -198,6 +198,8 @@ class ComputeStatistics extends TimedJob {
 			$statistics[$key] = 100/$max*$value;
 		}
 
+		arsort($statistics);
+
 		return $statistics;
 	}
 
