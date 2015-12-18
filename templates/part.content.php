@@ -28,7 +28,7 @@
 	</div>
 
 	<div class="section" id="enabledApps">
-		<h1>Enabled Apps</h1>
+		<h1>Enabled Apps (in % of installations)</h1>
 		<canvas id="appChart" width="800" height="400"></canvas>
 	</div>
 

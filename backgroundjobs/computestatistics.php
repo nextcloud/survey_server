@@ -192,6 +192,12 @@ class ComputeStatistics extends TimedJob {
 			}
 		}
 
+		$max = $statistics['files'];
+
+		foreach ($statistics as $key => $value) {
+			$statistics[$key] = 100/$max*$value;
+		}
+
 		return $statistics;
 	}
 

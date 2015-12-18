@@ -79,7 +79,7 @@
 				labels: appLabels,
 				datasets: [
 					{
-						label: "Enabled Apps",
+						label: "Enabled Apps (in %)",
 						fillColor: "rgba(151,187,205,0.5)",
 						strokeColor: "rgba(151,187,205,0.8)",
 						highlightFill: "rgba(151,187,205,0.75)",
