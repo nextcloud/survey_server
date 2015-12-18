@@ -38,6 +38,7 @@ class StatisticService {
 
 	/**
 	 * @param IDBConnection $connection
+	 * @param IConfig $config
 	 */
 	public function __construct(IDBConnection $connection, IConfig $config) {
 		$this->connection = $connection;

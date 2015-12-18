@@ -1,0 +1,166 @@
+{
+  "id" : {
+    "type" : "string",
+    "presentation" : "value"
+  },
+  "version" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "Version"
+  },
+  "theme" : {
+    "type" : "boolean",
+    "presentation" : "diagram",
+    "description" : "Theme Selected"
+  },
+  "code" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "Installation Source"
+  },
+  "enable_avatars" : {
+    "type" : "boolean",
+    "presentation" : "diagram",
+    "description" : "Avatars Enabled"
+  },
+  "enable_previews" : {
+    "type" : "boolean",
+    "presentation" : "diagram",
+    "description" : "Previews Enabled"
+  },
+  "memcache.local" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "Local Memcache"
+  },
+  "memcache.distributed" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "Distributed Memcache"
+  },
+  "asset-pipeline.enabled" : {
+    "type" : "boolean",
+    "presentation" : "diagram",
+    "description" : "Asset-Pipeline Enabled"
+  },
+  "debug" : {
+    "type" : "boolean",
+    "presentation" : "diagram",
+    "description" : "Debug Mode Enabled"
+  },
+  "filelocking.enabled" : {
+    "type" : "boolean",
+    "presentation" : "diagram",
+    "description" : "File Locking Enabled"
+  },
+  "memcache.locking" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "Memcache Locking Enabled"
+  },
+  "memory_limit" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Memory Limit"
+  },
+  "max_execution_time" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Max Execution Time"
+  },
+  "upload_max_filesize" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Max Upload Size"
+  },
+  "type" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "Type"
+  },
+  "size" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Size"
+  },
+  "num_files" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Files"
+  },
+  "num_users" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Users"
+  },
+  "num_storages" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Storages"
+  },
+  "num_storages_local" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Local Storages"
+  },
+  "num_storages_home" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Home Storages"
+  },
+  "num_storages_other" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of External Storages"
+  },
+  "permissions_" : {
+    "type" : "integer",
+    "presentation" : "diagram",
+    "description" : "Permissions"
+  },
+  "num_shares" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Shares"
+  },
+  "num_shares_user" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of User Shares"
+  },
+  "num_shares_groups" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Group Shares"
+  },
+  "num_shares_link" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Link Shares"
+  },
+  "num_shares_link_no_password" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of Link Shares without Password"
+  },
+  "num_fed_shares_received" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Received Federated Shares"
+  },
+  "num_fed_shares_sent" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Sent Federated Shares"
+  },
+  "enabled" : {
+    "type" : "boolean",
+    "presentation" : "diagram",
+    "description" : "Enabled"
+  },
+  "default_module" : {
+    "type" : "bool",
+    "presentation" : "diagram",
+    "description" : "Default Encryption Module Enabled"
+  }
+}

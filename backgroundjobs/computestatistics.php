@@ -24,6 +24,7 @@ namespace OCA\PopularityContestServer\BackgroundJobs;
 
 
 use OC\BackgroundJob\TimedJob;
+use OCA\PopularityContestServer\EvaluateStatistics;
 use OCP\IConfig;
 use OCP\IDBConnection;
 
@@ -35,21 +36,29 @@ class ComputeStatistics extends TimedJob {
 	/** @var IDBConnection */
 	private $connection;
 
+	/** @var EvaluateStatistics  */
+	private $evaluateStatistics;
+
 	/** @var IConfig */
 	private $config;
 
-	public function __construct(IDBConnection $connection = null, IConfig $config = null) {
+	public function __construct(
+		IDBConnection $connection = null,
+		IConfig $config = null,
+		EvaluateStatistics $evaluateStatistics = null
+	) {
 		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
 		$this->config = $config = $config ? $config : \OC::$server->getConfig();
+		$this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
 		$this->setInterval(24 * 60 * 60);
+		$this->run(null);
 	}
 
 	protected function run($argument) {
 		$result = [];
-		$result['stats'] = $this->getSystemStatistics();
 		$result['instances'] = $this->getNumberOfInstances();
+		$result['categories'] = $this->getStatisticsOfCategories();
 		$result['apps'] = $this->getApps();
-		$result['appStatistics'] = $this->getAppStatistics();
 
 		$this->config->setAppValue('popularitycontestserver', 'evaluated_statistics', json_encode($result));
 	}
@@ -67,24 +76,73 @@ class ComputeStatistics extends TimedJob {
 		return (int)$i['instances'];
 	}
 
-	private function getSystemStatistics() {
+	private function getStatisticsOfCategories() {
+		$categories = $this->getCategories();
+		$result = [];
+		foreach ($categories as $category) {
+			if ($category !== 'apps') {
+				$keys = $this->getKeysOfCategory($category);
+				foreach ($keys as $key) {
+					$presentationType = $this->evaluateStatistics->getPresentationType($key);
+					switch ($presentationType) {
+						case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
+							$result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
+							$result[$category][$key]['presentation'] = $presentationType;
+							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+							break;
+						case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
+							$result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
+							$result[$category][$key]['presentation'] = $presentationType;
+							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+							break;
+						case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
+							break;
+						default:
+							throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
+					}
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	private function getStatisticsDiagram($category, $key) {
+		$query = $this->connection->getQueryBuilder();
+
+		$result = $query
+			->select('value')
+			->from($this->table)
+			->where($query->expr()->eq('category', $query->createNamedParameter($category)))
+			->andWhere($query->expr()->eq('key', $query->createNamedParameter($key)))
+			->execute();
+		$values = $result->fetchAll();
+		$result->closeCursor();
 
 		$statistics = [];
+		foreach ($values as $value) {
+			if (isset($statistics[$value['value']])) {
+				$statistics[$value['value']] = $statistics[$key][$value['value']] + 1;
+			} else {
+				$statistics[$value['value']] = 1;
+			}
+		}
 
-		$keys = $this->getKeysOfCategory('stats');
+		return $statistics;
+	}
+
+	private function getNumericalEvaluatedStatistics($category, $key) {
 
 		$query = $this->connection->getQueryBuilder();
-		foreach ($keys as $key) {
-			$result = $query
-				->select($query->createFunction('AVG(`value`) AS average, MAX(`value`) as max, MIN(`value`) as min'))
-				->from($this->table)
-				->where($query->expr()->eq('key', $query->createNamedParameter($key['key'])))
-				->andWhere($query->expr()->eq('category', $query->createNamedParameter('stats')))
-				->execute();
-			$data = $result->fetchAll();
-			$statistics[$key['key']] = $data[0];
-			$result->closeCursor();
-		}
+		$result = $query
+			->select($query->createFunction('AVG(`value`) AS average, MAX(`value`) as max, MIN(`value`) as min'))
+			->from($this->table)
+			->where($query->expr()->eq('key', $query->createNamedParameter($key)))
+			->andWhere($query->expr()->eq('category', $query->createNamedParameter($category)))
+			->execute();
+		$data = $result->fetchAll();
+		$statistics = $data[0];
+		$result->closeCursor();
 
 		return $statistics;
 
@@ -104,7 +162,7 @@ class ComputeStatistics extends TimedJob {
 		$keys = $result->fetchAll();
 		$result->closeCursor();
 
-		return $keys;
+		return array_map(function($array) { return $array['key']; }, $keys);
 	}
 
 
@@ -120,7 +178,8 @@ class ComputeStatistics extends TimedJob {
 			->select('key')
 			->from($this->table)
 			->where($query->expr()->eq('category', $query->createNamedParameter('apps')))
-			->execute();
+
+					->execute();
 		$keys = $result->fetchAll();
 		$result->closeCursor();
 
@@ -168,26 +227,6 @@ class ComputeStatistics extends TimedJob {
 	}
 
 	/**
-	 * get remaining statistics beside 'apps' and 'stats'
-	 */
-	private function getAppStatistics() {
-		$appsStatistics = [];
-		$categories = $this->getCategories();
-		foreach ($categories as $category) {
-			if ($category['category'] !== 'apps' && $category['category'] !== 'stats') {
-				$keys = $this->getKeysOfCategory($category['category']);
-				foreach ($keys as $key) {
-					$generalStatistics = $this->getGeneralStatistics($category['category'], $key['key']);
-					foreach($generalStatistics as $statKey => $statValue) {
-						$appsStatistics[$category['category']][$statKey] = $statValue;
-					}
-				}
-			}
-		}
-		return $appsStatistics;
-	}
-
-	/**
 	 * get all categories
 	 *
 	 * @return array
@@ -199,6 +238,6 @@ class ComputeStatistics extends TimedJob {
 		$categories = $result->fetchAll();
 		$result->closeCursor();
 
-		return $categories;
+		return array_map(function($array) { return $array['category']; }, $categories);
 	}
 }

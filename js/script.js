@@ -40,11 +40,26 @@
 		 * @param instances how many instances are counted
 		 * @param users statistics about the users
 		 */
-		var showGeneralStatistics = function(instances, users) {
+		var showGeneralStatistics = function(instances, users, files) {
 			$('#instances span').text(instances);
 			$('#maxUsers span').text(users['max']);
 			$('#minUsers span').text(users['min']);
 			$('#averageUsers span').text(users['average']);
+			$('#maxFiles span').text(files['max']);
+			$('#minFiles span').text(files['min']);
+			$('#averageFiles span').text(files['average']);
+
+		};
+
+		/**
+		 * add general statistics to the page
+		 * @param instances how many instances are counted
+		 * @param users statistics about the users
+		 */
+		var ocNumericStatistics = function(id, data) {
+			$('#' + id + 'Max span').text(data['max']);
+			$('#' + id + 'Min span').text(data['min']);
+			$('#' + id + 'Average span').text(data['average']);
 		};
 
 		/**
@@ -104,13 +119,17 @@
 			OC.generateUrl('/apps/popularitycontestserver/api/v1/data'), {}
 		).done(
 			function (data) {
-				//showGeneralStatistics(data['instances'], data['users']);
+				showGeneralStatistics(data['instances'], data['categories']['stats']['num_users']['statistics'], data['categories']['stats']['num_files']['statistics']);
 				appsChart(data['apps']);
 
-				for (category in data['appStatistics']) {
-					for(key in data['appStatistics'][category]) {
-						for (value in data['appStatistics'][category][key]) {
-							ocChart(category + key + 'Chart', data['appStatistics'][category][key]);
+				for (category in data['categories']) {
+					for(key in data['categories'][category]) {
+						if (key !== 'stats') {
+							if (data['categories'][category][key]['presentation'] === 'diagram') {
+								ocChart(category + key + 'Chart', data['categories'][category][key]['statistics']);
+							} else if (data['categories'][category][key]['presentation'] === 'numerical evaluation') {
+								ocNumericStatistics(category + key + 'Numeric', data['categories'][category][key]['statistics']);
+							}
 						}
 					}
 				}
