@@ -1,4 +1,4 @@
-# Popularity Contest Server
+# Survey Server
 
 This is the survey server app. It collects anonymised
 data send by other Nextcloud installations, evaluates them and visualize it.
