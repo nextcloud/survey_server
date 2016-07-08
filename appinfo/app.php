@@ -41,7 +41,7 @@ $container->query('OCP\INavigationManager')->add(function () use ($container) {
 
 		// the icon that will be shown in the navigation
 		// this file needs to exist in img/
-		'icon' => $urlGenerator->imagePath('survery_server', 'app.svg'),
+		'icon' => $urlGenerator->imagePath('survey_server', 'app.svg'),
 
 		// the title of your application. This will be used in the
 		// navigation or on the settings page of your app
