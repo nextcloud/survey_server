@@ -97,7 +97,7 @@ class StatisticService {
 	 * @return array
 	 */
 	public function get() {
-		$data = $this->config->getAppValue('survey_server', 'evaluated_statistics', []);
+		$data = $this->config->getAppValue('survey_server', 'evaluated_statistics', '[]');
 		return json_decode($data, true);
 	}
 
