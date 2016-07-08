@@ -20,36 +20,38 @@
  */
 
 
-namespace OCA\PopularityContestServer\Controller;
+namespace OCA\Survey_Server\Controller;
 
-
-use OCA\PopularityContestServer\Service\StatisticService;
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\DataResponse;
+use OCA\Survey_Server\Service\StatisticService;
 use OCP\IRequest;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Controller;
 
-class ApiController extends \OCP\AppFramework\ApiController {
+class PageController extends Controller {
+
+	/** @var StatisticService */
+	protected $service;
 
 	/**
+	 * PageController constructor.
+	 *
 	 * @param string $AppName
 	 * @param IRequest $request
 	 * @param StatisticService $service
 	 */
-	public function __construct($AppName, IRequest $request,
-								StatisticService $service){
+	public function __construct($AppName, IRequest $request, StatisticService $service){
 		parent::__construct($AppName, $request);
+
 		$this->service = $service;
 	}
 
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
-	 *
-	 * @return DataResponse
 	 */
-	public function get() {
-		$result = $this->service->get();
-		return new DataResponse($result);
+	public function index() {
+		$statistics = $this->service->get();
+		return new TemplateResponse('survey_server', 'main', $statistics);
 	}
 
 }

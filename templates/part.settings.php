@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+?>
 <div id="app-settings">
 	<div id="app-settings-header">
 		<button class="settings-button"

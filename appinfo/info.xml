@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <info>
-    <id>popularitycontestserver</id>
-    <name>Popularity Contest Server</name>
-    <description>Collects information from other ownCloud servers about enabled apps, settings, etc and visualize them</description>
+    <id>survey_server</id>
+    <name>Survey Server</name>
+    <description>Collects information from other Nextcloud servers about enabled apps, settings, etc and visualize them</description>
     <licence>AGPL</licence>
     <author>Bjoern Schiessle</author>
     <version>0.1.3</version>
-    <namespace>PopularityContestServer</namespace>
+    <namespace>Survey_Server</namespace>
     <category>other</category>
     <dependencies>
         <owncloud min-version="8.1" />

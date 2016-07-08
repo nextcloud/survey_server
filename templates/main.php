@@ -18,9 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-script('popularitycontestserver', 'script');
-vendor_script('popularitycontestserver', 'Chart');
-style('popularitycontestserver', 'style');
+script('survey_server', 'script');
+vendor_script('survey_server', 'Chart');
+style('survey_server', 'style');
 ?>
 
 <div id="app">

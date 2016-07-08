@@ -20,7 +20,7 @@
  */
 
 
-namespace OCA\PopularityContestServer;
+namespace OCA\Survey_Server;
 
 
 class EvaluateStatistics {
@@ -35,7 +35,7 @@ class EvaluateStatistics {
 	private $dataSchema;
 
 	public function __construct() {
-		$dataSchema = file_get_contents(\OC_App::getAppPath('popularitycontestserver') . $this->dataSchemaFile);
+		$dataSchema = file_get_contents(\OC_App::getAppPath('survey_server') . $this->dataSchemaFile);
 		$this->dataSchema = json_decode($dataSchema, true);
 	}
 

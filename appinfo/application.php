@@ -19,11 +19,11 @@
  *
  */
 
-namespace OCA\PopularityContestServer\AppInfo;
+namespace OCA\Survey_Server\AppInfo;
 
 
-use OCA\PopularityContestServer\Api\ExternalApi;
-use OCA\PopularityContestServer\Service\StatisticService;
+use OCA\Survey_Server\Api\ExternalApi;
+use OCA\Survey_Server\Service\StatisticService;
 use OCP\API;
 use OCP\App;
 
@@ -34,15 +34,15 @@ class Application extends \OCP\AppFramework\App {
 	 * @param array $urlParams
 	 */
 	public function __construct($urlParams = array()) {
-		parent::__construct('popularitycontestserver', $urlParams);
+		parent::__construct('survey_server', $urlParams);
 		$this->registerService();
 	}
 
 	private function registerService() {
 		$container = $this->getContainer();
 
-		$container->registerService('statisticService', function(IAppContainer $c) {
-			return new StatisticService(\OC::$server->getDatabaseConnection());
+		$container->registerService('statisticService', function() {
+			return new StatisticService(\OC::$server->getDatabaseConnection(), \OC::$server->getConfig());
 		});
 	}
 
@@ -54,12 +54,15 @@ class Application extends \OCP\AppFramework\App {
 		$container = $this->getContainer();
 		$server = $container->getServer();
 
-		$api = new ExternalApi($server->getRequest(), $container->query('statisticService'));
+		$request = $server->getRequest();
+		$statisticService = $container->query('statisticService');
+		$api = new ExternalApi($request, $statisticService);
+		//$api = new ExternalApi($server->getRequest(), $container->query('statisticService'));
 
 		API::register('post',
-			'/apps/popularitycontestserver/api/v1/survey',
+			'/apps/survey_server/api/v1/survey',
 			array($api, 'receiveSurveyResults'),
-			'popularitycontestserver',
+			'survey_server',
 			API::GUEST_AUTH
 		);
 

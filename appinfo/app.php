@@ -19,7 +19,7 @@
  *
  */
 
-namespace OCA\PopularityContestServer\AppInfo;
+namespace OCA\Survey_Server\AppInfo;
 
 $app = new Application();
 $app->registerOCSApi();
@@ -30,21 +30,21 @@ $container->query('OCP\INavigationManager')->add(function () use ($container) {
 	$l10n = $container->query('OCP\IL10N');
 	return [
 		// the string under which your app will be referenced in owncloud
-		'id' => 'popularitycontestserver',
+		'id' => 'survey_server',
 
 		// sorting weight for the navigation. The higher the number, the higher
 		// will it be listed in the navigation
 		'order' => 10,
 
 		// the route that will be shown on startup
-		'href' => $urlGenerator->linkToRoute('popularitycontestserver.page.index'),
+		'href' => $urlGenerator->linkToRoute('survey_server.page.index'),
 
 		// the icon that will be shown in the navigation
 		// this file needs to exist in img/
-		'icon' => $urlGenerator->imagePath('popularitycontestserver', 'app.svg'),
+		'icon' => $urlGenerator->imagePath('survery_server', 'app.svg'),
 
 		// the title of your application. This will be used in the
 		// navigation or on the settings page of your app
-		'name' => $l10n->t('Popularity Contest'),
+		'name' => $l10n->t('Survey'),
 	];
 });

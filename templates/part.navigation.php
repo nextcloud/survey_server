@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+?>
 <ul>
 	<li><a href="#generalStatistics">General Statistics</a></li>
 	<li><a href="#enabledApps">Enabled Apps</a></li>

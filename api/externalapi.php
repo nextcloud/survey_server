@@ -20,10 +20,10 @@
  */
 
 
-namespace OCA\PopularityContestServer\Api;
+namespace OCA\Survey_Server\Api;
 
 
-use OCA\PopularityContestServer\Service\StatisticService;
+use OCA\Survey_Server\Service\StatisticService;
 use OCP\AppFramework\Http;
 use OCP\IRequest;
 

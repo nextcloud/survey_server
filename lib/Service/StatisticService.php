@@ -21,7 +21,7 @@
  */
 
 
-namespace OCA\PopularityContestServer\Service;
+namespace OCA\Survey_Server\Service;
 
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -35,7 +35,7 @@ class StatisticService {
 	protected $config;
 
 	/** @var string	*/
-	protected $table = 'popularity_contest';
+	protected $table = 'survey_results';
 
 	/**
 	 * @param IDBConnection $connection
@@ -97,7 +97,7 @@ class StatisticService {
 	 * @return array
 	 */
 	public function get() {
-		$data = $this->config->getAppValue('popularitycontestserver', 'evaluated_statistics', []);
+		$data = $this->config->getAppValue('survey_server', 'evaluated_statistics', []);
 		return json_decode($data, true);
 	}
 
