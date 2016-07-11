@@ -19,8 +19,9 @@
  *
  */
 
-namespace OCA\PopularityContestServer\Controller;
+namespace OCA\Survey_Server\Controller;
 
+use OCA\Survey_Server\Service\StatisticService;
 use PHPUnit_Framework_TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
@@ -29,30 +30,30 @@ use OCP\AppFramework\Http\TemplateResponse;
 class PageControllerTest extends PHPUnit_Framework_TestCase {
 
 	private $controller;
-	private $userId = 'john';
+	/** @var  StatisticService | \PHPUnit_Framework_MockObject_MockObject */
+	private $statisticService;
 
 	public function setUp() {
 		$request = $this->getMockBuilder('OCP\IRequest')->getMock();
+		$this->statisticService = $this->getMockBuilder('OCA\Survey_Server\Service\StatisticService')
+			->disableOriginalConstructor()->getMock();
 
 		$this->controller = new PageController(
-			'popularitycontestserver', $request, $this->userId
+			'survey_server', $request, $this->statisticService
 		);
 	}
 
 
 	public function testIndex() {
+
+		$this->statisticService->expects($this->once())->method('get')
+			->willReturn(['stat1' => 42]);
+
 		$result = $this->controller->index();
 
-		$this->assertEquals(['user' => 'john'], $result->getParams());
+		$this->assertEquals(['stat1' => 42], $result->getParams());
 		$this->assertEquals('main', $result->getTemplateName());
 		$this->assertTrue($result instanceof TemplateResponse);
 	}
-
-
-	public function testEcho() {
-		$result = $this->controller->doEcho('hi');
-		$this->assertEquals(['echo' => 'hi'], $result->getData());
-	}
-
 
 }

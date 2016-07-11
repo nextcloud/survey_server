@@ -19,4 +19,4 @@
  *
  */
 
-\OC::$server->getJobList()->add('OCA\PopularityContestServer\BackgroundJobs\ComputeStatistics');
+\OC::$server->getJobList()->add('OCA\Survey_Server\BackgroundJobs\ComputeStatistics');

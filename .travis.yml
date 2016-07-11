@@ -1,49 +1,45 @@
 language: php
+
 php:
   - 5.4
   - 5.5
   - 5.6
-  - hhvm
+  - 7
 
 env:
   global:
-    - BRANCH=master
+    - CORE_BRANCH=master
   matrix:
-    - DB=mysql
+    - DB=sqlite
 
-matrix:
-  allow_failures:
-    - php: hhvm
-  include:
-    - php: 5.4
-      env: DB=sqlite
-    - php: 5.4
-      env: DB=pgsql
+branches:
+  only:
+    - master
+    - /^stable\d+(\.\d+)?$/
 
-
-install:
-  # install ocdev
-  - sudo apt-get -y install python3-jinja2 python3-setuptools
-  - sudo easy_install3 requests
-  - sudo easy_install3 ocdev
-  # set up postgresql
-  - createuser -U travis -s oc_autotest
-  # set up mysql
-  - mysql -e 'create database oc_autotest;'
-  - mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
-  - mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
-  # install owncloud
-  - cd ..
-  - ocdev setup core --dir owncloud --branch $BRANCH --no-history
-  - mv popularitycontestserver owncloud/apps
-  - phpenv config-add owncloud/apps/popularitycontestserver/tests/travis/php.ini
-  - cd owncloud
-  - ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --database-pass --admin-user admin --admin-pass admin --database $DB
-  - ./occ app:enable popularitycontestserver
-
-before_script:
-  - cd apps/popularitycontestserver
+sudo: true
+before_install:
+  - wget https://raw.githubusercontent.com/nextcloud/travis_ci/master/before_install.sh
+  - bash ./before_install.sh survey_server $CORE_BRANCH $DB
 
 script:
-  - phpunit -c phpunit.xml
-  - phpunit -c phpunit.integration.xml
+  # Test lint
+  - cd ../server
+  - cd apps/survey_server
+  - find . -name \*.php -exec php -l "{}" \;
+
+  # Run phpunit tests
+  - cd tests/unit
+  - phpunit --configuration phpunit.xml
+
+  # Create coverage report
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover clover.xml
+
+matrix:
+  include:
+    - php: 5.4
+      env: DB=mysql
+    - php: 5.4
+      env: DB=pgsql
+  fast_finish: true

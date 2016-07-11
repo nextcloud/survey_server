@@ -116,7 +116,7 @@
 		};
 
 		$.get(
-			OC.generateUrl('/apps/popularitycontestserver/api/v1/data'), {}
+			OC.generateUrl('/apps/survey_server/api/v1/data'), {}
 		).done(
 			function (data) {
 				showGeneralStatistics(data['instances'], data['categories']['stats']['num_users']['statistics'], data['categories']['stats']['num_files']['statistics']);

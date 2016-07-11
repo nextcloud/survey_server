@@ -5,7 +5,7 @@
 	<overwrite>false</overwrite>
 	<charset>utf8</charset>
 	<table>
-		<name>*dbprefix*popularity_contest</name>
+		<name>*dbprefix*survey_results</name>
 		<declaration>
 			<field>
 				<name>category</name>
@@ -40,7 +40,7 @@
 				<length>4</length>
 			</field>
 			<index>
-				<name>sh_popularity_contest</name>
+				<name>sh_survey_results</name>
 				<field>
 					<name>key</name>
 					<sorting>ascending</sorting>

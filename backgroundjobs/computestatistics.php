@@ -20,18 +20,18 @@
  */
 
 
-namespace OCA\PopularityContestServer\BackgroundJobs;
+namespace OCA\Survery_Server\BackgroundJobs;
 
 
 use OC\BackgroundJob\TimedJob;
-use OCA\PopularityContestServer\EvaluateStatistics;
+use OCA\Survey_Server\EvaluateStatistics;
 use OCP\IConfig;
 use OCP\IDBConnection;
 
 class ComputeStatistics extends TimedJob {
 
 	/** @var string	*/
-	protected $table = 'popularity_contest';
+	protected $table = 'survey_results';
 
 	/** @var IDBConnection */
 	private $connection;
@@ -59,7 +59,7 @@ class ComputeStatistics extends TimedJob {
 		$result['categories'] = $this->getStatisticsOfCategories();
 		$result['apps'] = $this->getApps();
 
-		$this->config->setAppValue('popularitycontestserver', 'evaluated_statistics', json_encode($result));
+		$this->config->setAppValue('survey_server', 'evaluated_statistics', json_encode($result));
 	}
 
 	/**
