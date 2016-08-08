@@ -20,7 +20,7 @@
  */
 
 
-namespace OCA\Survery_Server\BackgroundJobs;
+namespace OCA\Survey_Server\BackgroundJobs;
 
 
 use OC\BackgroundJob\TimedJob;
@@ -50,7 +50,8 @@ class ComputeStatistics extends TimedJob {
 		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
 		$this->config = $config = $config ? $config : \OC::$server->getConfig();
 		$this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
-		$this->setInterval(24 * 60 * 60);
+		//$this->setInterval(24 * 60 * 60);
+		$this->setInterval(1);
 	}
 
 	protected function run($argument) {
@@ -82,6 +83,8 @@ class ComputeStatistics extends TimedJob {
 			if ($category !== 'apps') {
 				$keys = $this->getKeysOfCategory($category);
 				foreach ($keys as $key) {
+					// we don't evaluate share permissions for now
+					if (strpos($key, 'permissions_') === 0) continue;
 					$presentationType = $this->evaluateStatistics->getPresentationType($key);
 					switch ($presentationType) {
 						case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
@@ -167,7 +170,7 @@ class ComputeStatistics extends TimedJob {
 
 
 	/**
-	 * get statistic of enablebled apps
+	 * get statistic of enabled apps
 	 *
 	 * @return array
 	 */
