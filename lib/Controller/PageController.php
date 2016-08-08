@@ -22,6 +22,7 @@
 
 namespace OCA\Survey_Server\Controller;
 
+use OCA\Survery_Server\BackgroundJobs\ComputeStatistics;
 use OCA\Survey_Server\Service\StatisticService;
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
