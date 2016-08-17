@@ -21,6 +21,10 @@
 ?>
 <div id="surveyResults">
 
+	<?php if(empty($_['statistics'])) { ?>
+		No statistics available, please try later
+	<?php } else { ?>
+
 	<div class="section" id="generalStatistics">
 		<h1>General Statistics</h1>
 
@@ -84,5 +88,5 @@
 			</div>
 		<?php } ?>
 	<?php } ?>
-
+	<?php } ?>
 </div>
