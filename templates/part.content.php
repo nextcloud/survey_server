@@ -28,7 +28,7 @@
 	<div class="section" id="generalStatistics">
 		<h1>General Statistics</h1>
 
-		<p id="instances">Counted ownCloud installations: <span></span></p>
+		<p id="instances">Counted Nextcloud installations: <span></span></p>
 
 		<br />
 
