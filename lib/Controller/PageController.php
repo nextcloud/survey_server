@@ -50,7 +50,7 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index() {
-		$statistics = $this->service->get();
+		$statistics = ['statistics' => $this->service->get()];
 		return new TemplateResponse('survey_server', 'main', $statistics);
 	}
 
