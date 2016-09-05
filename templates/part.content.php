@@ -28,7 +28,7 @@
 	<div class="section" id="generalStatistics">
 		<h1>General Statistics</h1>
 
-		<p id="instances">Counted ownCloud installations: <span></span></p>
+		<p id="instances">Counted Nextcloud installations: <span></span></p>
 
 		<br />
 
@@ -57,7 +57,7 @@
 		<canvas id="appChart" width="800" height="400"></canvas>
 	</div>
 
-	<?php foreach ($_['categories'] as $category => $data) { ?>
+	<?php foreach ($_['statistics']['categories'] as $category => $data) { ?>
 
 		<?php if ($category !== 'stats') { ?>
 			<div class="section section-stats" id="<?php p('survey' . ucfirst($category)); ?>">
