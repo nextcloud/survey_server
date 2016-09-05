@@ -51,7 +51,7 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
 
 		$result = $this->controller->index();
 
-		$this->assertEquals(['stat1' => 42], $result->getParams());
+		$this->assertEquals(['statistics' => ['stat1' => 42]], $result->getParams());
 		$this->assertEquals('main', $result->getTemplateName());
 		$this->assertTrue($result instanceof TemplateResponse);
 	}
