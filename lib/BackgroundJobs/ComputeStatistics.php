@@ -136,7 +136,7 @@ class ComputeStatistics extends TimedJob {
 
 		$query = $this->connection->getQueryBuilder();
 		$result = $query
-			->select($query->createFunction('AVG(`value`) AS average, MAX(`value`) as max, MIN(`value`) as min'))
+			->select($query->createFunction('AVG(CAST(`value` AS SIGNED)) AS average, MAX(CAST(`value` AS SIGNED)) as max, MIN(CAST(`value` AS SIGNED)) as min'))
 			->from($this->table)
 			->where($query->expr()->eq('key', $query->createNamedParameter($key)))
 			->andWhere($query->expr()->eq('category', $query->createNamedParameter($category)))
