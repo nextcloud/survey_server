@@ -57,9 +57,15 @@
 		 * @param users statistics about the users
 		 */
 		var ocNumericStatistics = function(id, data) {
-			$('#' + id + 'Max span').text(data['max']);
-			$('#' + id + 'Min span').text(data['min']);
-			$('#' + id + 'Average span').text(data['average']);
+			if (id.substring(0, 3) == 'php' || id.substring(0, 8) == 'database') {
+				$('#' + id + 'Max span').text(OC.Util.humanFileSize(data['max']));
+				$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
+				$('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
+			} else {
+				$('#' + id + 'Max span').text(data['max']);
+				$('#' + id + 'Min span').text(data['min']);
+				$('#' + id + 'Average span').text(data['average']);
+			}
 		};
 
 		/**
