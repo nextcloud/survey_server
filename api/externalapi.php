@@ -41,6 +41,7 @@ class ExternalApi {
 	 *
 	 * @param IRequest $request
 	 * @param StatisticService $service
+	 * @param IConfig $config
 	 */
 	public function __construct(
 		IRequest $request,

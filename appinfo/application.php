@@ -56,7 +56,7 @@ class Application extends \OCP\AppFramework\App {
 
 		$request = $server->getRequest();
 		$statisticService = $container->query('statisticService');
-		$api = new ExternalApi($request, $statisticService);
+		$api = new ExternalApi($request, $statisticService, $server->getConfig());
 		//$api = new ExternalApi($server->getRequest(), $container->query('statisticService'));
 
 		API::register('post',
