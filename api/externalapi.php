@@ -63,9 +63,10 @@ class ExternalApi {
 		$data = $this->request->getParam('data');
 
 		$array = json_decode($data, true);
+		$array['timestamp'] = time();
 
 		$logFile = \OC::$server->getConfig()->getSystemValue('datadirectory') . '/survey.log';
-		file_put_contents($logFile, $data . PHP_EOL, FILE_APPEND);
+		file_put_contents($logFile, json_encode($array). PHP_EOL, FILE_APPEND);
 
 		if ($array === null) {
 			return new \OC_OCS_Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
