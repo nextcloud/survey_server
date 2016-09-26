@@ -25,15 +25,16 @@ namespace OCA\Survey_Server\Api;
 
 use OCA\Survey_Server\Service\StatisticService;
 use OCP\AppFramework\Http;
+use OCP\IConfig;
 use OCP\IRequest;
 
 class ExternalApi {
-
 	/** @var IRequest */
 	private $request;
-
 	/** @var StatisticService */
 	private $service;
+	/** @var IConfig */
+	private $config;
 
 	/**
 	 * OCSAuthAPI constructor.
@@ -43,10 +44,12 @@ class ExternalApi {
 	 */
 	public function __construct(
 		IRequest $request,
-		StatisticService $service
+		StatisticService $service,
+		IConfig $config
 	) {
 		$this->request = $request;
 		$this->service = $service;
+		$this->config = $config;
 	}
 
 	/**
@@ -59,6 +62,9 @@ class ExternalApi {
 		$data = $this->request->getParam('data');
 
 		$array = json_decode($data, true);
+
+		$logFile = \OC::$server->getConfig()->getSystemValue('datadirectory') . '/survey.log';
+		file_put_contents($logFile, $data . PHP_EOL, FILE_APPEND);
 
 		if ($array === null) {
 			return new \OC_OCS_Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
