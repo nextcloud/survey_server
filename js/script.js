@@ -105,8 +105,13 @@
 		 * @param array data
 		 */
 		var ocChart = function (id, data) {
-			var ocChartData = new Array();
+			var ocChartData = new Array(),
+				$details = $('#' + id + 'Details');
+
 			for (key in data) {
+				$details.append($('<span>').text(key + ': ' + data[key]));
+				$details.append($('<br>'));
+
 				ocChartData.push(
 					{
 						value: data[key],
@@ -116,9 +121,8 @@
 				);
 
 			}
-			var ctx = document.getElementById(id).getContext("2d");
+			var ctx = document.getElementById(id + 'Chart').getContext("2d");
 			var myPieChart = new Chart(ctx).Pie(ocChartData);
-
 		};
 
 		$.get(
@@ -132,7 +136,7 @@
 					for(key in data['categories'][category]) {
 						if (key !== 'stats') {
 							if (data['categories'][category][key]['presentation'] === 'diagram') {
-								ocChart(category + key + 'Chart', data['categories'][category][key]['statistics']);
+								ocChart((category + key).replace('.', '-'), data['categories'][category][key]['statistics']);
 							} else if (data['categories'][category][key]['presentation'] === 'numerical evaluation') {
 								ocNumericStatistics(category + key + 'Numeric', data['categories'][category][key]['statistics']);
 							}

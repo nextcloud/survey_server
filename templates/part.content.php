@@ -80,7 +80,12 @@
 					<?php if ($value['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) {?>
 						<div class="chart">
 							<h2><?php p(($value['description']));?></h2>
-							<canvas id="<?php p($category . $key . 'Chart');?>" width="400" height="300"></canvas>
+
+							<details id="<?php p(str_replace('.', '-', $category . $key) . 'Details');?>">
+								<summary>
+									<canvas id="<?php p(str_replace('.', '-', $category . $key) . 'Chart');?>" width="400" height="300"></canvas>
+								</summary>
+							</details>
 						</div>
 					<?php }
 				} ?>
