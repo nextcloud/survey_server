@@ -122,14 +122,46 @@ class ComputeStatistics extends TimedJob {
 
 		$statistics = [];
 		foreach ($values as $value) {
-			if (isset($statistics[$value['value']])) {
-				$statistics[$value['value']] = $statistics[$value['value']] + 1;
+			$name = $this->clearValue($category, $key, $value['value']);
+			if (isset($statistics[$name])) {
+				$statistics[$name] = $statistics[$name] + 1;
 			} else {
-				$statistics[$value['value']] = 1;
+				$statistics[$name] = 1;
 			}
 		}
 
 		return $statistics;
+	}
+
+	private function clearValue($category, $key, $value) {
+		if (strpos($key, 'memcache.') === 0) {
+			return $value !== '' ? trim($value, '\\') : 'none';
+		}
+
+		if ($key === 'version') {
+			$version = explode('.', $value);
+			$majorMinorVersion = $version[0] . '.' . (int) $version[1];
+
+			if ($category === 'database') {
+				switch ($version[0]) {
+					case '2':
+					case '3':
+						return 'SQLite ' . $majorMinorVersion;
+					case '5':
+					case '6':
+						return 'MySQL ' . $majorMinorVersion;
+					case '10':
+					case '11':
+						return 'MariaDB ' . $majorMinorVersion;
+					default:
+						return $majorMinorVersion;
+				}
+			}
+
+			return $majorMinorVersion;
+		}
+
+		return $value;
 	}
 
 	private function getNumericalEvaluatedStatistics($category, $key) {
