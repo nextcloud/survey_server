@@ -130,6 +130,7 @@ class ComputeStatistics extends TimedJob {
 			}
 		}
 
+		arsort($statistics, SORT_NUMERIC);
 		return $statistics;
 	}
 
@@ -141,6 +142,10 @@ class ComputeStatistics extends TimedJob {
 		if ($key === 'version') {
 			$version = explode('.', $value);
 			$majorMinorVersion = $version[0] . '.' . (int) $version[1];
+
+			if ($category === 'server') {
+				return $majorMinorVersion . '.' . $version[2];
+			}
 
 			if ($category === 'database') {
 				switch ($version[0]) {
@@ -161,7 +166,11 @@ class ComputeStatistics extends TimedJob {
 			return $majorMinorVersion;
 		}
 
-		return $value;
+		if ($key === 'max_execution_time') {
+			return $value . 's';
+		}
+
+		return (string) $value;
 	}
 
 	private function getNumericalEvaluatedStatistics($category, $key) {
