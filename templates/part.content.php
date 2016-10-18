@@ -53,8 +53,14 @@
 	</div>
 
 	<div class="section" id="enabledApps">
-		<h1>Enabled Apps (in % of installations)</h1>
-		<canvas id="appChart" width="800" height="400"></canvas>
+		<h1>Enabled Apps</h1>
+
+		<h2>Top 75 (in %)</h2>
+		<canvas id="appChart" width="1000" height="400"></canvas>
+
+		<details id="appDetails">
+			<summary><strong>Full list</strong></summary>
+		</details>
 	</div>
 
 	<?php foreach ($_['statistics']['categories'] as $category => $data) { ?>

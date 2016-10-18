@@ -79,11 +79,19 @@
 		 * @param array data
 		 */
 		var appsChart = function (data) {
-			var appLabels = new Array();
-			var appValues = new Array();
-			for (key in data) {
-				appLabels.push(key);
-				appValues.push(data[key]);
+			var appLabels = [],
+				appValues = [],
+				numApps = 0,
+				$details = $('#appDetails');
+			for (var key in data) {
+				$details.append($('<span>').text(key + ': ' + data[key]));
+				$details.append($('<br>'));
+
+				if (numApps < 75) {
+					appLabels.push(key);
+					appValues.push(100 * data[key] / (data['survey_client']));
+					numApps++;
+				}
 			}
 
 			var appData = {

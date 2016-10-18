@@ -236,9 +236,15 @@ class ComputeStatistics extends TimedJob {
 		}
 
 		$max = $statistics['survey_client'];
+		$apps = \OC::$server->getAppManager()->getAlwaysEnabledApps();
+		$apps = array_flip($apps);
 
 		foreach ($statistics as $key => $value) {
-			$statistics[$key] = 100/$max*$value;
+			if (!isset($apps[$key])) {
+				$statistics[$key] = $value;
+			} else {
+				unset($statistics[$key]);
+			}
 		}
 
 		arsort($statistics);
