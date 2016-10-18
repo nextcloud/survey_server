@@ -35,19 +35,24 @@
 			return color;
 		};
 
+		var formatNumber = function(number) {
+			number = number.toString();
+			return number.replace(/(\d)(?=(\d{3})+(\.|$))/g, '$1,');
+		};
+
 		/**
 		 * add general statistics to the page
 		 * @param instances how many instances are counted
 		 * @param users statistics about the users
 		 */
 		var showGeneralStatistics = function(instances, users, files) {
-			$('#instances span').text(instances);
-			$('#maxUsers span').text(users['max']);
-			$('#minUsers span').text(users['min']);
-			$('#averageUsers span').text(users['average']);
-			$('#maxFiles span').text(files['max']);
-			$('#minFiles span').text(files['min']);
-			$('#averageFiles span').text(files['average']);
+			$('#instances span').text(formatNumber(instances));
+			$('#maxUsers span').text(formatNumber(users['max']));
+			$('#minUsers span').text(formatNumber(users['min']));
+			$('#averageUsers span').text(formatNumber(users['average']));
+			$('#maxFiles span').text(formatNumber(files['max']));
+			$('#minFiles span').text(formatNumber(files['min']));
+			$('#averageFiles span').text(formatNumber(files['average']));
 
 		};
 
@@ -62,9 +67,9 @@
 				$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
 				$('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
 			} else {
-				$('#' + id + 'Max span').text(data['max']);
-				$('#' + id + 'Min span').text(data['min']);
-				$('#' + id + 'Average span').text(data['average']);
+				$('#' + id + 'Max span').text(formatNumber(data['max']));
+				$('#' + id + 'Min span').text(formatNumber(data['min']));
+				$('#' + id + 'Average span').text(formatNumber(data['average']));
 			}
 		};
 
