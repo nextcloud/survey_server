@@ -122,14 +122,55 @@ class ComputeStatistics extends TimedJob {
 
 		$statistics = [];
 		foreach ($values as $value) {
-			if (isset($statistics[$value['value']])) {
-				$statistics[$value['value']] = $statistics[$value['value']] + 1;
+			$name = $this->clearValue($category, $key, $value['value']);
+			if (isset($statistics[$name])) {
+				$statistics[$name] = $statistics[$name] + 1;
 			} else {
-				$statistics[$value['value']] = 1;
+				$statistics[$name] = 1;
 			}
 		}
 
+		arsort($statistics, SORT_NUMERIC);
 		return $statistics;
+	}
+
+	private function clearValue($category, $key, $value) {
+		if (strpos($key, 'memcache.') === 0) {
+			return $value !== '' ? trim($value, '\\') : 'none';
+		}
+
+		if ($key === 'version') {
+			$version = explode('.', $value);
+			$majorMinorVersion = $version[0] . '.' . (int) $version[1];
+
+			if ($category === 'server') {
+				return $majorMinorVersion . '.' . $version[2];
+			}
+
+			if ($category === 'database') {
+				switch ($version[0]) {
+					case '2':
+					case '3':
+						return 'SQLite ' . $majorMinorVersion;
+					case '5':
+					case '6':
+						return 'MySQL ' . $majorMinorVersion;
+					case '10':
+					case '11':
+						return 'MariaDB ' . $majorMinorVersion;
+					default:
+						return $majorMinorVersion;
+				}
+			}
+
+			return $majorMinorVersion;
+		}
+
+		if ($key === 'max_execution_time') {
+			return $value . 's';
+		}
+
+		return (string) $value;
 	}
 
 	private function getNumericalEvaluatedStatistics($category, $key) {
@@ -195,9 +236,15 @@ class ComputeStatistics extends TimedJob {
 		}
 
 		$max = $statistics['survey_client'];
+		$apps = \OC::$server->getAppManager()->getAlwaysEnabledApps();
+		$apps = array_flip($apps);
 
 		foreach ($statistics as $key => $value) {
-			$statistics[$key] = 100/$max*$value;
+			if (!isset($apps[$key])) {
+				$statistics[$key] = $value;
+			} else {
+				unset($statistics[$key]);
+			}
 		}
 
 		arsort($statistics);

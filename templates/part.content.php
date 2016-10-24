@@ -53,8 +53,14 @@
 	</div>
 
 	<div class="section" id="enabledApps">
-		<h1>Enabled Apps (in % of installations)</h1>
-		<canvas id="appChart" width="800" height="400"></canvas>
+		<h1>Enabled Apps</h1>
+
+		<h2>Top 75 (in %)</h2>
+		<canvas id="appChart" width="1000" height="400"></canvas>
+
+		<details id="appDetails">
+			<summary><strong>Full list</strong></summary>
+		</details>
 	</div>
 
 	<?php foreach ($_['statistics']['categories'] as $category => $data) { ?>
@@ -80,7 +86,12 @@
 					<?php if ($value['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) {?>
 						<div class="chart">
 							<h2><?php p(($value['description']));?></h2>
-							<canvas id="<?php p($category . $key . 'Chart');?>" width="400" height="300"></canvas>
+
+							<details id="<?php p(str_replace('.', '-', $category . $key) . 'Details');?>">
+								<summary>
+									<canvas id="<?php p(str_replace('.', '-', $category . $key) . 'Chart');?>" width="400" height="300"></canvas>
+								</summary>
+							</details>
 						</div>
 					<?php }
 				} ?>

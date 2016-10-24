@@ -35,19 +35,24 @@
 			return color;
 		};
 
+		var formatNumber = function(number) {
+			number = number.toString();
+			return number.replace(/(\d)(?=(\d{3})+(\.|$))/g, '$1,');
+		};
+
 		/**
 		 * add general statistics to the page
 		 * @param instances how many instances are counted
 		 * @param users statistics about the users
 		 */
 		var showGeneralStatistics = function(instances, users, files) {
-			$('#instances span').text(instances);
-			$('#maxUsers span').text(users['max']);
-			$('#minUsers span').text(users['min']);
-			$('#averageUsers span').text(users['average']);
-			$('#maxFiles span').text(files['max']);
-			$('#minFiles span').text(files['min']);
-			$('#averageFiles span').text(files['average']);
+			$('#instances span').text(formatNumber(instances));
+			$('#maxUsers span').text(formatNumber(users['max']));
+			$('#minUsers span').text(formatNumber(users['min']));
+			$('#averageUsers span').text(formatNumber(users['average']));
+			$('#maxFiles span').text(formatNumber(files['max']));
+			$('#minFiles span').text(formatNumber(files['min']));
+			$('#averageFiles span').text(formatNumber(files['average']));
 
 		};
 
@@ -62,9 +67,9 @@
 				$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
 				$('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
 			} else {
-				$('#' + id + 'Max span').text(data['max']);
-				$('#' + id + 'Min span').text(data['min']);
-				$('#' + id + 'Average span').text(data['average']);
+				$('#' + id + 'Max span').text(formatNumber(data['max']));
+				$('#' + id + 'Min span').text(formatNumber(data['min']));
+				$('#' + id + 'Average span').text(formatNumber(data['average']));
 			}
 		};
 
@@ -74,11 +79,19 @@
 		 * @param array data
 		 */
 		var appsChart = function (data) {
-			var appLabels = new Array();
-			var appValues = new Array();
-			for (key in data) {
-				appLabels.push(key);
-				appValues.push(data[key]);
+			var appLabels = [],
+				appValues = [],
+				numApps = 0,
+				$details = $('#appDetails');
+			for (var key in data) {
+				$details.append($('<span>').text(key + ': ' + data[key]));
+				$details.append($('<br>'));
+
+				if (numApps < 75) {
+					appLabels.push(key);
+					appValues.push(100 * data[key] / (data['survey_client']));
+					numApps++;
+				}
 			}
 
 			var appData = {
@@ -105,8 +118,13 @@
 		 * @param array data
 		 */
 		var ocChart = function (id, data) {
-			var ocChartData = new Array();
+			var ocChartData = new Array(),
+				$details = $('#' + id + 'Details');
+
 			for (key in data) {
+				$details.append($('<span>').text(key + ': ' + data[key]));
+				$details.append($('<br>'));
+
 				ocChartData.push(
 					{
 						value: data[key],
@@ -116,9 +134,8 @@
 				);
 
 			}
-			var ctx = document.getElementById(id).getContext("2d");
+			var ctx = document.getElementById(id + 'Chart').getContext("2d");
 			var myPieChart = new Chart(ctx).Pie(ocChartData);
-
 		};
 
 		$.get(
@@ -132,7 +149,7 @@
 					for(key in data['categories'][category]) {
 						if (key !== 'stats') {
 							if (data['categories'][category][key]['presentation'] === 'diagram') {
-								ocChart(category + key + 'Chart', data['categories'][category][key]['statistics']);
+								ocChart((category + key).replace('.', '-'), data['categories'][category][key]['statistics']);
 							} else if (data['categories'][category][key]['presentation'] === 'numerical evaluation') {
 								ocNumericStatistics(category + key + 'Numeric', data['categories'][category][key]['statistics']);
 							}
