@@ -50,9 +50,11 @@
 			$('#maxUsers span').text(formatNumber(users['max']));
 			$('#minUsers span').text(formatNumber(users['min']));
 			$('#averageUsers span').text(formatNumber(users['average']));
+			$('#totalUsers span').text(formatNumber(users['total']));
 			$('#maxFiles span').text(formatNumber(files['max']));
 			$('#minFiles span').text(formatNumber(files['min']));
 			$('#averageFiles span').text(formatNumber(files['average']));
+			$('#totalFiles span').text(formatNumber(files['total']));
 
 		};
 
@@ -66,10 +68,12 @@
 				$('#' + id + 'Max span').text(OC.Util.humanFileSize(data['max']));
 				$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
 				$('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
+				$('#' + id + 'Total span').text(OC.Util.humanFileSize(data['total']));
 			} else {
 				$('#' + id + 'Max span').text(formatNumber(data['max']));
 				$('#' + id + 'Min span').text(formatNumber(data['min']));
 				$('#' + id + 'Average span').text(formatNumber(data['average']));
+				$('#' + id + 'Total span').text(formatNumber(data['total']));
 			}
 		};
 

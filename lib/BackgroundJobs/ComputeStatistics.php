@@ -177,7 +177,8 @@ class ComputeStatistics extends TimedJob {
 
 		$query = $this->connection->getQueryBuilder();
 		$result = $query
-			->select($query->createFunction('AVG(CAST(`value` AS SIGNED)) AS average, MAX(CAST(`value` AS SIGNED)) as max, MIN(CAST(`value` AS SIGNED)) as min'))
+			->select($query->createFunction('AVG(CAST(`value` AS SIGNED)) AS average, MAX(CAST(`value` AS SIGNED)) AS max, MIN(CAST(`value` AS SIGNED)) AS min'))
+			->addSelect($query->createFunction('SUM(CAST(`value` AS SIGNED)) AS total'))
 			->from($this->table)
 			->where($query->expr()->eq('key', $query->createNamedParameter($key)))
 			->andWhere($query->expr()->eq('category', $query->createNamedParameter($category)))
