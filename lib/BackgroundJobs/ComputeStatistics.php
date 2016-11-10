@@ -235,7 +235,6 @@ class ComputeStatistics extends TimedJob {
 			}
 		}
 
-		$max = $statistics['survey_client'];
 		$apps = \OC::$server->getAppManager()->getAlwaysEnabledApps();
 		$apps = array_flip($apps);
 
@@ -248,37 +247,6 @@ class ComputeStatistics extends TimedJob {
 		}
 
 		arsort($statistics);
-
-		return $statistics;
-	}
-
-	/**
-	 * get statistics how often a specific key was reported for a given category
-	 *
-	 * @param string $category
-	 * @param string $key
-	 * @return array
-	 */
-	private function getGeneralStatistics($category, $key) {
-		$query = $this->connection->getQueryBuilder();
-
-		$result = $query
-			->select('value')
-			->from($this->table)
-			->where($query->expr()->eq('category', $query->createNamedParameter($category)))
-			->andWhere($query->expr()->eq('key', $query->createNamedParameter($key)))
-			->execute();
-		$values = $result->fetchAll();
-		$result->closeCursor();
-
-		$statistics = [];
-		foreach ($values as $value) {
-			if (isset($statistics[$key][$value['value']])) {
-				$statistics[$key][$value['value']] = $statistics[$key][$value['value']] + 1;
-			} else {
-				$statistics[$key][$value['value']] = 1;
-			}
-		}
 
 		return $statistics;
 	}
