@@ -38,6 +38,11 @@
     "presentation" : "diagram",
     "description" : "Distributed Memcache"
   },
+  "cron" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "Cron Execution"
+  },
   "asset-pipeline.enabled" : {
     "type" : "boolean",
     "presentation" : "diagram",
