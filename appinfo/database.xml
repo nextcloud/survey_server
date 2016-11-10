@@ -11,7 +11,7 @@
 				<name>category</name>
 				<type>text</type>
 				<notnull>true</notnull>
-				<length>512</length>
+				<length>128</length>
 			</field>
 			<field>
 				<name>key</name>
