@@ -113,6 +113,26 @@
     "presentation" : "numerical evaluation",
     "description" : "Number of External Storages"
   },
+  "num_comments" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of comments"
+  },
+  "num_comment_markers" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of users reading comments"
+  },
+  "num_systemtags" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of system tags"
+  },
+  "num_systemtags_mappings" : {
+    "type" : "integer",
+    "presentation" : "numerical evaluation",
+    "description" : "Number of system tag assignments"
+  },
   "permissions_" : {
     "type" : "integer",
     "presentation" : "diagram",
