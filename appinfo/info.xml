@@ -9,6 +9,6 @@
     <namespace>Survey_Server</namespace>
     <category>other</category>
     <dependencies>
-        <owncloud min-version="8.1" />
+        <nextcloud min-version="9" max-version="11"/>
     </dependencies>
 </info>
