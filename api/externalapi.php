@@ -65,7 +65,7 @@ class ExternalApi {
 		$array = json_decode($data, true);
 		$array['timestamp'] = time();
 
-		$logFile = \OC::$server->getConfig()->getSystemValue('datadirectory') . '/survey.log';
+		$logFile = \OC::$server->getConfig()->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
 		file_put_contents($logFile, json_encode($array). PHP_EOL, FILE_APPEND);
 
 		if ($array === null) {
