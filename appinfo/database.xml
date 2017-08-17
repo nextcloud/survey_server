@@ -50,6 +50,12 @@
 					<sorting>ascending</sorting>
 				</field>
 			</index>
+			<index>
+				<name>ss_source</name>
+				<field>
+					<name>source</name>
+				</field>
+			</index>
 		</declaration>
 	</table>
 </database>
