@@ -56,7 +56,7 @@ class ExternalApi {
 	/**
 	 * request received to ask remote server for a shared secret
 	 *
-	 * @return \OC_OCS_Result
+	 * @return \OC\OCS\Result
 	 */
 	public function receiveSurveyResults() {
 
@@ -69,16 +69,16 @@ class ExternalApi {
 		file_put_contents($logFile, json_encode($array). PHP_EOL, FILE_APPEND);
 
 		if ($array === null) {
-			return new \OC_OCS_Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
+			return new \OC\OCS\Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
 		}
 
 		try {
 			$this->service->add($array);
 		} catch (\Exception $e) {
-			return new \OC_OCS_Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
+			return new \OC\OCS\Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
 		}
 
-		return new \OC_OCS_Result(null, Http::STATUS_OK);
+		return new \OC\OCS\Result(null, Http::STATUS_OK);
 
 	}
 
