@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
  *
@@ -20,35 +21,36 @@
  */
 
 
-namespace OCA\Survey_Server\Api;
-
+namespace OCA\Survey_Server\Controller;
 
 use OCA\Survey_Server\Service\StatisticService;
-use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCSController;
 use OCP\IConfig;
 use OCP\IRequest;
 
-class ExternalApi {
-	/** @var IRequest */
-	private $request;
+class ExternalApiController extends OCSController {
 	/** @var StatisticService */
 	private $service;
+
 	/** @var IConfig */
 	private $config;
 
 	/**
 	 * OCSAuthAPI constructor.
 	 *
+	 * @param string $appName
 	 * @param IRequest $request
 	 * @param StatisticService $service
 	 * @param IConfig $config
 	 */
-	public function __construct(
-		IRequest $request,
-		StatisticService $service,
-		IConfig $config
-	) {
-		$this->request = $request;
+	public function __construct(string $appName,
+								IRequest $request,
+								StatisticService $service,
+								IConfig $config) {
+		parent::__construct($appName, $request);
+
 		$this->service = $service;
 		$this->config = $config;
 	}
@@ -56,29 +58,28 @@ class ExternalApi {
 	/**
 	 * request received to ask remote server for a shared secret
 	 *
-	 * @return \OC\OCS\Result
+	 * @param $data
+	 * @return DataResponse
+	 * @throws OCSBadRequestException
 	 */
-	public function receiveSurveyResults() {
-
-		$data = $this->request->getParam('data');
-
+	public function receiveSurveyResults($data): DataResponse {
 		$array = json_decode($data, true);
 		$array['timestamp'] = time();
 
-		$logFile = \OC::$server->getConfig()->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
+		$logFile = $this->config->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
 		file_put_contents($logFile, json_encode($array). PHP_EOL, FILE_APPEND);
 
 		if ($array === null) {
-			return new \OC\OCS\Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
+			throw new OCSBadRequestException('Invalid data supplied.');
 		}
 
 		try {
 			$this->service->add($array);
 		} catch (\Exception $e) {
-			return new \OC\OCS\Result(null, Http::STATUS_BAD_REQUEST, 'Invalid data supplied.');
+			throw new OCSBadRequestException('Invalid data supplied.');
 		}
 
-		return new \OC\OCS\Result(null, Http::STATUS_OK);
+		return new DataResponse([]);
 
 	}
 
