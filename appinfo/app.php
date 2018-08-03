@@ -22,7 +22,6 @@
 namespace OCA\Survey_Server\AppInfo;
 
 $app = new Application();
-$app->registerOCSApi();
 $container = $app->getContainer();
 
 $container->query('OCP\INavigationManager')->add(function () use ($container) {

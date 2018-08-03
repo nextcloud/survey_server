@@ -46,26 +46,4 @@ class Application extends \OCP\AppFramework\App {
 		});
 	}
 
-	/**
-	 * register OCS API Calls
-	 */
-	public function registerOCSApi() {
-
-		$container = $this->getContainer();
-		$server = $container->getServer();
-
-		$request = $server->getRequest();
-		$statisticService = $container->query('statisticService');
-		$api = new ExternalApi($request, $statisticService, $server->getConfig());
-		//$api = new ExternalApi($server->getRequest(), $container->query('statisticService'));
-
-		API::register('post',
-			'/apps/survey_server/api/v1/survey',
-			array($api, 'receiveSurveyResults'),
-			'survey_server',
-			API::GUEST_AUTH
-		);
-
-	}
-
 }

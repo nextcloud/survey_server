@@ -34,6 +34,9 @@ return [
 
 		// api
 		['name' => 'api#add', 'url' => '/api/v1/data', 'verb' => 'POST'],
-		['name' => 'api#get', 'url' => '/api/v1/data', 'verb' => 'GET'],
-    ]
+		['name' => 'api#get', 'url' => '/api/v1/data', 'verb' => 'GET']
+	],
+	'ocs' => [
+		['name' => 'ExternalApi#receiveSurveyResults', 'url' => '/api/v1/survey', 'verb' => 'POST'],
+	],
 ];
