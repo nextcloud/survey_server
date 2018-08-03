@@ -22,12 +22,12 @@
 namespace OCA\Survey_Server\Controller;
 
 use OCA\Survey_Server\Service\StatisticService;
-use PHPUnit_Framework_TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
+use Test\TestCase;
 
 
-class PageControllerTest extends PHPUnit_Framework_TestCase {
+class PageControllerTest extends TestCase {
 
 	private $controller;
 	/** @var  StatisticService | \PHPUnit_Framework_MockObject_MockObject */
