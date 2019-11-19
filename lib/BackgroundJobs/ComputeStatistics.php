@@ -27,6 +27,7 @@ use OC\BackgroundJob\TimedJob;
 use OCA\Survey_Server\EvaluateStatistics;
 use OCP\IConfig;
 use OCP\IDBConnection;
+use OCP\ILogger;
 
 class ComputeStatistics extends TimedJob {
 
@@ -35,23 +36,25 @@ class ComputeStatistics extends TimedJob {
 
 	/** @var IDBConnection */
 	private $connection;
-
-	/** @var EvaluateStatistics  */
-	private $evaluateStatistics;
-
 	/** @var IConfig */
 	private $config;
+	/** @var ILogger */
+	private $logger;
+	/** @var EvaluateStatistics */
+	private $evaluateStatistics;
 
-	public function __construct(IDBConnection $connection = null,
-								IConfig $config = null,
-								EvaluateStatistics $evaluateStatistics = null) {
-		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
-		$this->config = $config = $config ? $config : \OC::$server->getConfig();
-		$this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
+	public function __construct(IDBConnection $connection,
+								IConfig $config,
+								ILogger $logger,
+								EvaluateStatistics $evaluateStatistics) {
+		$this->connection = $connection;
+		$this->config = $config;
+		$this->logger = $logger;
+		$this->evaluateStatistics = $evaluateStatistics;
 		$this->setInterval(60 * 60);
 	}
 
-	protected function run($argument) {
+	protected function run($argument): void {
 
 		$lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', '[]');
 		$newResult = json_decode($lastResult, true);
@@ -110,22 +113,27 @@ class ComputeStatistics extends TimedJob {
 					if (strpos($key, 'permissions_') === 0) {
 						continue;
 					}
-					$presentationType = $this->evaluateStatistics->getPresentationType($key);
-					switch ($presentationType) {
-						case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
-							$result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
-							$result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
-							break;
-						default:
-							throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
+
+					try {
+						$presentationType = $this->evaluateStatistics->getPresentationType($key);
+						switch ($presentationType) {
+							case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
+								$result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
+								$result[$category][$key]['presentation'] = $presentationType;
+								$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+								break;
+							case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
+								$result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
+								$result[$category][$key]['presentation'] = $presentationType;
+								$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+								break;
+							case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
+								break;
+							default:
+								throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
+						}
+					} catch (\BadMethodCallException $e) {
+						$this->logger->logException($e);
 					}
 				}
 			}
