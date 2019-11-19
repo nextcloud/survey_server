@@ -107,7 +107,9 @@ class ComputeStatistics extends TimedJob {
 				$keys = $this->getKeysOfCategory($category);
 				foreach ($keys as $key) {
 					// we don't evaluate share permissions for now
-					if (strpos($key, 'permissions_') === 0) continue;
+					if (strpos($key, 'permissions_') === 0) {
+						continue;
+					}
 					$presentationType = $this->evaluateStatistics->getPresentationType($key);
 					switch ($presentationType) {
 						case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
@@ -148,7 +150,7 @@ class ComputeStatistics extends TimedJob {
 		foreach ($values as $value) {
 			$name = $this->clearValue($category, $key, $value['value']);
 			if (isset($statistics[$name])) {
-				$statistics[$name] = $statistics[$name] + 1;
+				$statistics[$name] += 1;
 			} else {
 				$statistics[$name] = 1;
 			}
@@ -254,7 +256,7 @@ class ComputeStatistics extends TimedJob {
 		$statistics = [];
 		foreach ($keys as $key) {
 			if (isset($statistics[$key['key']])) {
-				$statistics[$key['key']] = $statistics[$key['key']] + 1;
+				$statistics[$key['key']] += 1;
 			} else {
 				$statistics[$key['key']] = 1;
 			}
