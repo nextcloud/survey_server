@@ -5,10 +5,10 @@
     <description>Collects information from other Nextcloud servers about enabled apps, settings, etc and visualize them</description>
     <licence>AGPL</licence>
     <author>Bjoern Schiessle</author>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
     <namespace>Survey_Server</namespace>
     <category>other</category>
     <dependencies>
-        <nextcloud min-version="9" max-version="14"/>
+        <nextcloud min-version="17" max-version="18"/>
     </dependencies>
 </info>
