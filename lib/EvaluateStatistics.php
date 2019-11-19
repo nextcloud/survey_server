@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
  *
@@ -25,9 +26,9 @@ namespace OCA\Survey_Server;
 
 class EvaluateStatistics {
 
-	const PRESENTATION_TYPE_DIAGRAM = 'diagram';
-	const PRESENTATION_TYPE_NUMERICAL_EVALUATION = 'numerical evaluation';
-	const PRESENTATION_TYPE_VALUE = 'value';
+	public const PRESENTATION_TYPE_DIAGRAM = 'diagram';
+	public const PRESENTATION_TYPE_NUMERICAL_EVALUATION = 'numerical evaluation';
+	public const PRESENTATION_TYPE_VALUE = 'value';
 
 	private $dataSchemaFile = '/data.json';
 
@@ -39,7 +40,7 @@ class EvaluateStatistics {
 		$this->dataSchema = json_decode($dataSchema, true);
 	}
 
-	public function getType($key) {
+	public function getType(string $key): string {
 		if (!isset($this->dataSchema[$key])) {
 			throw new \BadMethodCallException('Key "' . $key . '" is not defined"');
 		}
@@ -47,7 +48,7 @@ class EvaluateStatistics {
 		return $this->dataSchema[$key]['type'];
 	}
 
-	public function getPresentationType($key) {
+	public function getPresentationType(string $key): string {
 		if (!isset($this->dataSchema[$key])) {
 			throw new \BadMethodCallException('Key "' . $key . '" is not defined"');
 		}
@@ -55,7 +56,7 @@ class EvaluateStatistics {
 		return $this->dataSchema[$key]['presentation'];
 	}
 
-	public function getDescription($key) {
+	public function getDescription(string $key): string {
 		if (!isset($this->dataSchema[$key])) {
 			throw new \BadMethodCallException('Key "' . $key . '" is not defined"');
 		}

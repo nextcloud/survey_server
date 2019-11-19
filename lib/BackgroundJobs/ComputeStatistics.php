@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
  *
@@ -19,7 +20,6 @@
  *
  */
 
-
 namespace OCA\Survey_Server\BackgroundJobs;
 
 
@@ -30,7 +30,7 @@ use OCP\IDBConnection;
 
 class ComputeStatistics extends TimedJob {
 
-	/** @var string	*/
+	/** @var string */
 	protected $table = 'survey_results';
 
 	/** @var IDBConnection */
@@ -42,11 +42,9 @@ class ComputeStatistics extends TimedJob {
 	/** @var IConfig */
 	private $config;
 
-	public function __construct(
-		IDBConnection $connection = null,
-		IConfig $config = null,
-		EvaluateStatistics $evaluateStatistics = null
-	) {
+	public function __construct(IDBConnection $connection = null,
+								IConfig $config = null,
+								EvaluateStatistics $evaluateStatistics = null) {
 		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
 		$this->config = $config = $config ? $config : \OC::$server->getConfig();
 		$this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
@@ -90,7 +88,7 @@ class ComputeStatistics extends TimedJob {
 	 *
 	 * @return int
 	 */
-	private function getNumberOfInstances() {
+	private function getNumberOfInstances(): int {
 		$countInstances = $this->connection->getQueryBuilder();
 		$i = $countInstances->select($countInstances->createFunction('COUNT(DISTINCT `source`) as instances'))
 			->from($this->table)->execute()->fetch();
@@ -98,7 +96,7 @@ class ComputeStatistics extends TimedJob {
 		return (int)$i['instances'];
 	}
 
-	private function getStatisticsOfCategories() {
+	private function getStatisticsOfCategories(): array {
 		$categories = $this->getCategories();
 		$result = [];
 		foreach ($categories as $category) {
@@ -131,7 +129,7 @@ class ComputeStatistics extends TimedJob {
 		return $result;
 	}
 
-	private function getStatisticsDiagram($category, $key) {
+	private function getStatisticsDiagram(string $category, string $key): array {
 		$query = $this->connection->getQueryBuilder();
 
 		$result = $query
@@ -157,7 +155,7 @@ class ComputeStatistics extends TimedJob {
 		return $statistics;
 	}
 
-	private function clearValue($category, $key, $value) {
+	private function clearValue(string $category, string $key, $value): string {
 		if (strpos($key, 'memcache.') === 0) {
 			return $value !== '' ? trim($value, '\\') : 'none';
 		}
@@ -196,7 +194,7 @@ class ComputeStatistics extends TimedJob {
 		return (string) $value;
 	}
 
-	private function getNumericalEvaluatedStatistics($category, $key) {
+	private function getNumericalEvaluatedStatistics(string $category, string $key): float {
 
 		$query = $this->connection->getQueryBuilder();
 		$result = $query
@@ -221,7 +219,7 @@ class ComputeStatistics extends TimedJob {
 	 * @param string $category
 	 * @return array
 	 */
-	private function getKeysOfCategory($category) {
+	private function getKeysOfCategory(string $category): array {
 		$getKeys = $this->connection->getQueryBuilder();
 		$getKeys->selectDistinct('key')->from($this->table)
 			->where($getKeys->expr()->eq('category', $getKeys->createNamedParameter($category)));
@@ -238,7 +236,7 @@ class ComputeStatistics extends TimedJob {
 	 *
 	 * @return array
 	 */
-	private function getApps() {
+	private function getApps(): array {
 		$query = $this->connection->getQueryBuilder();
 
 		$result = $query
@@ -280,7 +278,7 @@ class ComputeStatistics extends TimedJob {
 	 *
 	 * @return array
 	 */
-	private function getCategories() {
+	private function getCategories(): array {
 		$getCategories = $this->connection->getQueryBuilder();
 		$getCategories->selectDistinct('category')->from($this->table);
 		$result = $getCategories->execute();

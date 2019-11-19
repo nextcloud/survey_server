@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
  *
@@ -32,14 +33,9 @@ class PageController extends Controller {
 	/** @var StatisticService */
 	protected $service;
 
-	/**
-	 * PageController constructor.
-	 *
-	 * @param string $AppName
-	 * @param IRequest $request
-	 * @param StatisticService $service
-	 */
-	public function __construct($AppName, IRequest $request, StatisticService $service){
+	public function __construct(string $AppName,
+								IRequest $request,
+								StatisticService $service) {
 		parent::__construct($AppName, $request);
 
 		$this->service = $service;
@@ -48,8 +44,9 @@ class PageController extends Controller {
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
+	 * @return TemplateResponse
 	 */
-	public function index() {
+	public function index(): TemplateResponse {
 		$statistics = ['statistics' => $this->service->get()];
 		return new TemplateResponse('survey_server', 'main', $statistics);
 	}
