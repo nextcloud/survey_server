@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Survey_Server\Controller;
 
 use OCA\Survey_Server\Service\StatisticService;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Controller;
@@ -48,7 +49,12 @@ class PageController extends Controller {
 	 */
 	public function index(): TemplateResponse {
 		$statistics = ['statistics' => $this->service->get()];
-		return new TemplateResponse('survey_server', 'main', $statistics);
+
+		$response = new TemplateResponse('survey_server', 'main', $statistics);
+		$csp = new ContentSecurityPolicy();
+		$csp->allowEvalScript(true);
+		$response->setContentSecurityPolicy($csp);
+		return $response;
 	}
 
 }
