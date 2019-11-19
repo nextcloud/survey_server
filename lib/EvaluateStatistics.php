@@ -40,6 +40,11 @@ class EvaluateStatistics {
 		$this->dataSchema = json_decode($dataSchema, true);
 	}
 
+	/**
+	 * @param string $key
+	 * @return string
+	 * @throws \BadMethodCallException
+	 */
 	public function getType(string $key): string {
 		if (!isset($this->dataSchema[$key])) {
 			throw new \BadMethodCallException('Key "' . $key . '" is not defined"');
@@ -48,6 +53,11 @@ class EvaluateStatistics {
 		return $this->dataSchema[$key]['type'];
 	}
 
+	/**
+	 * @param string $key
+	 * @return string
+	 * @throws \BadMethodCallException
+	 */
 	public function getPresentationType(string $key): string {
 		if (!isset($this->dataSchema[$key])) {
 			throw new \BadMethodCallException('Key "' . $key . '" is not defined"');
@@ -56,6 +66,11 @@ class EvaluateStatistics {
 		return $this->dataSchema[$key]['presentation'];
 	}
 
+	/**
+	 * @param string $key
+	 * @return string
+	 * @throws \BadMethodCallException
+	 */
 	public function getDescription(string $key): string {
 		if (!isset($this->dataSchema[$key])) {
 			throw new \BadMethodCallException('Key "' . $key . '" is not defined"');
