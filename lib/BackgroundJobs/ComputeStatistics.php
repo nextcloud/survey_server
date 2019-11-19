@@ -53,7 +53,7 @@ class ComputeStatistics extends TimedJob {
 
 	protected function run($argument) {
 
-		$lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', []);
+		$lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', '[]');
 		$newResult = json_decode($lastResult, true);
 
 		if (!isset($newResult['lastRun'])) {
@@ -96,6 +96,9 @@ class ComputeStatistics extends TimedJob {
 		return (int)$i['instances'];
 	}
 
+	/**
+	 * @return array
+	 */
 	private function getStatisticsOfCategories(): array {
 		$categories = $this->getCategories();
 		$result = [];
@@ -194,7 +197,7 @@ class ComputeStatistics extends TimedJob {
 		return (string) $value;
 	}
 
-	private function getNumericalEvaluatedStatistics(string $category, string $key): float {
+	private function getNumericalEvaluatedStatistics(string $category, string $key): array {
 
 		$query = $this->connection->getQueryBuilder();
 		$result = $query
