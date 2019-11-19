@@ -24,4 +24,13 @@
 	<background-jobs>
 		<job>OCA\Survey_Server\BackgroundJobs\ComputeStatistics</job>
 	</background-jobs>
+
+	<navigations>
+		<navigation>
+			<name>Survey</name>
+			<route>survey_server.page.index</route>
+			<icon>app.svg</icon>
+			<order>10</order>
+		</navigation>
+	</navigations>
 </info>
