@@ -1,14 +1,23 @@
 <?xml version="1.0"?>
-<info>
-    <id>survey_server</id>
-    <name>Survey Server</name>
-    <description>Collects information from other Nextcloud servers about enabled apps, settings, etc and visualize them</description>
-    <licence>AGPL</licence>
-    <author>Bjoern Schiessle</author>
-    <version>0.1.6</version>
-    <namespace>Survey_Server</namespace>
-    <category>other</category>
-    <dependencies>
-        <nextcloud min-version="17" max-version="18"/>
-    </dependencies>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+	<id>survey_server</id>
+	<name>Survey Server</name>
+	<summary>Collects information from other Nextcloud servers about enabled apps, settings, etc and visualize them</summary>
+	<description>Collects information from other Nextcloud servers about enabled apps, settings, etc and visualize them</description>
+
+	<version>0.1.6</version>
+	<licence>agpl</licence>
+
+	<author>Bjoern Schiessle</author>
+	<namespace>Survey_Server</namespace>
+	<category>monitoring</category>
+
+	<website>https://github.com/nextcloud/survey_server</website>
+	<bugs>https://github.com/nextcloud/survey_server/issues</bugs>
+	<repository>https://github.com/nextcloud/survey_server.git</repository>
+
+	<dependencies>
+		<nextcloud min-version="17" max-version="18" />
+	</dependencies>
 </info>
