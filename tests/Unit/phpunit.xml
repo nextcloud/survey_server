@@ -5,7 +5,7 @@
 		 timeoutForMediumTests="900"
 		 timeoutForLargeTests="900"
 		>
-	<testsuite name='Nextcloud - Nextloud Survey Server Tests'>
+	<testsuite name='Nextcloud - Nextcloud Survey Server Tests'>
 		<directory suffix='Test.php'>.</directory>
 	</testsuite>
 	<!-- filters for code coverage -->
@@ -14,7 +14,6 @@
 			<directory suffix=".php">../../../survey_server</directory>
 			<exclude>
 				<directory suffix=".php">../../../survey_server/l10n</directory>
-				<directory suffix=".php">../../../survey_server/lists</directory>
 				<directory suffix=".php">../../../survey_server/tests/unit</directory>
 			</exclude>
 		</whitelist>
