@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @copyright Copyright (c) 2018 Bjoern Schiessle <bjoern@schiessle.org>
  *
@@ -35,20 +36,10 @@ class ExternalApiController extends OCSController {
 	/** @var IConfig */
 	private $config;
 
-	/**
-	 * OCSAuthAPI constructor.
-	 *
-	 * @param string $appName
-	 * @param IRequest $request
-	 * @param StatisticService $service
-	 * @param IConfig $config
-	 */
-	public function __construct(
-		$appName,
-		IRequest $request,
-		StatisticService $service,
-		IConfig $config
-	) {
+	public function __construct(string $appName,
+								IRequest $request,
+								StatisticService $service,
+								IConfig $config) {
 		parent::__construct($appName, $request);
 		$this->service = $service;
 		$this->config = $config;
@@ -63,13 +54,13 @@ class ExternalApiController extends OCSController {
 	 * @param string $data
 	 * @return DataResponse
 	 */
-	public function receiveSurveyResults(string $data) {
+	public function receiveSurveyResults(string $data): DataResponse {
 
 		$array = json_decode($data, true);
 
 		$array['timestamp'] = time();
 
-		$logFile = \OC::$server->getConfig()->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
+		$logFile = $this->config->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
 		file_put_contents($logFile, json_encode($array). PHP_EOL, FILE_APPEND);
 
 		if ($array === null) {

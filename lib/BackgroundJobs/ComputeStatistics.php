@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
  *
@@ -19,7 +20,6 @@
  *
  */
 
-
 namespace OCA\Survey_Server\BackgroundJobs;
 
 
@@ -27,35 +27,36 @@ use OC\BackgroundJob\TimedJob;
 use OCA\Survey_Server\EvaluateStatistics;
 use OCP\IConfig;
 use OCP\IDBConnection;
+use OCP\ILogger;
 
 class ComputeStatistics extends TimedJob {
 
-	/** @var string	*/
+	/** @var string */
 	protected $table = 'survey_results';
 
 	/** @var IDBConnection */
 	private $connection;
-
-	/** @var EvaluateStatistics  */
-	private $evaluateStatistics;
-
 	/** @var IConfig */
 	private $config;
+	/** @var ILogger */
+	private $logger;
+	/** @var EvaluateStatistics */
+	private $evaluateStatistics;
 
-	public function __construct(
-		IDBConnection $connection = null,
-		IConfig $config = null,
-		EvaluateStatistics $evaluateStatistics = null
-	) {
-		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
-		$this->config = $config = $config ? $config : \OC::$server->getConfig();
-		$this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
+	public function __construct(IDBConnection $connection,
+								IConfig $config,
+								ILogger $logger,
+								EvaluateStatistics $evaluateStatistics) {
+		$this->connection = $connection;
+		$this->config = $config;
+		$this->logger = $logger;
+		$this->evaluateStatistics = $evaluateStatistics;
 		$this->setInterval(60 * 60);
 	}
 
-	protected function run($argument) {
+	protected function run($argument): void {
 
-		$lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', []);
+		$lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', '[]');
 		$newResult = json_decode($lastResult, true);
 
 		if (!isset($newResult['lastRun'])) {
@@ -90,7 +91,7 @@ class ComputeStatistics extends TimedJob {
 	 *
 	 * @return int
 	 */
-	private function getNumberOfInstances() {
+	private function getNumberOfInstances(): int {
 		$countInstances = $this->connection->getQueryBuilder();
 		$i = $countInstances->select($countInstances->createFunction('COUNT(DISTINCT `source`) as instances'))
 			->from($this->table)->execute()->fetch();
@@ -98,7 +99,10 @@ class ComputeStatistics extends TimedJob {
 		return (int)$i['instances'];
 	}
 
-	private function getStatisticsOfCategories() {
+	/**
+	 * @return array
+	 */
+	private function getStatisticsOfCategories(): array {
 		$categories = $this->getCategories();
 		$result = [];
 		foreach ($categories as $category) {
@@ -106,23 +110,30 @@ class ComputeStatistics extends TimedJob {
 				$keys = $this->getKeysOfCategory($category);
 				foreach ($keys as $key) {
 					// we don't evaluate share permissions for now
-					if (strpos($key, 'permissions_') === 0) continue;
-					$presentationType = $this->evaluateStatistics->getPresentationType($key);
-					switch ($presentationType) {
-						case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
-							$result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
-							$result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
-							break;
-						default:
-							throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
+					if (strpos($key, 'permissions_') === 0) {
+						continue;
+					}
+
+					try {
+						$presentationType = $this->evaluateStatistics->getPresentationType($key);
+						switch ($presentationType) {
+							case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
+								$result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
+								$result[$category][$key]['presentation'] = $presentationType;
+								$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+								break;
+							case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
+								$result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
+								$result[$category][$key]['presentation'] = $presentationType;
+								$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+								break;
+							case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
+								break;
+							default:
+								throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
+						}
+					} catch (\BadMethodCallException $e) {
+						$this->logger->logException($e);
 					}
 				}
 			}
@@ -131,7 +142,7 @@ class ComputeStatistics extends TimedJob {
 		return $result;
 	}
 
-	private function getStatisticsDiagram($category, $key) {
+	private function getStatisticsDiagram(string $category, string $key): array {
 		$query = $this->connection->getQueryBuilder();
 
 		$result = $query
@@ -147,7 +158,7 @@ class ComputeStatistics extends TimedJob {
 		foreach ($values as $value) {
 			$name = $this->clearValue($category, $key, $value['value']);
 			if (isset($statistics[$name])) {
-				$statistics[$name] = $statistics[$name] + 1;
+				$statistics[$name] += 1;
 			} else {
 				$statistics[$name] = 1;
 			}
@@ -157,7 +168,7 @@ class ComputeStatistics extends TimedJob {
 		return $statistics;
 	}
 
-	private function clearValue($category, $key, $value) {
+	private function clearValue(string $category, string $key, $value): string {
 		if (strpos($key, 'memcache.') === 0) {
 			return $value !== '' ? trim($value, '\\') : 'none';
 		}
@@ -196,7 +207,7 @@ class ComputeStatistics extends TimedJob {
 		return (string) $value;
 	}
 
-	private function getNumericalEvaluatedStatistics($category, $key) {
+	private function getNumericalEvaluatedStatistics(string $category, string $key): array {
 
 		$query = $this->connection->getQueryBuilder();
 		$result = $query
@@ -221,7 +232,7 @@ class ComputeStatistics extends TimedJob {
 	 * @param string $category
 	 * @return array
 	 */
-	private function getKeysOfCategory($category) {
+	private function getKeysOfCategory(string $category): array {
 		$getKeys = $this->connection->getQueryBuilder();
 		$getKeys->selectDistinct('key')->from($this->table)
 			->where($getKeys->expr()->eq('category', $getKeys->createNamedParameter($category)));
@@ -238,7 +249,7 @@ class ComputeStatistics extends TimedJob {
 	 *
 	 * @return array
 	 */
-	private function getApps() {
+	private function getApps(): array {
 		$query = $this->connection->getQueryBuilder();
 
 		$result = $query
@@ -253,7 +264,7 @@ class ComputeStatistics extends TimedJob {
 		$statistics = [];
 		foreach ($keys as $key) {
 			if (isset($statistics[$key['key']])) {
-				$statistics[$key['key']] = $statistics[$key['key']] + 1;
+				$statistics[$key['key']] += 1;
 			} else {
 				$statistics[$key['key']] = 1;
 			}
@@ -280,7 +291,7 @@ class ComputeStatistics extends TimedJob {
 	 *
 	 * @return array
 	 */
-	private function getCategories() {
+	private function getCategories(): array {
 		$getCategories = $this->connection->getQueryBuilder();
 		$getCategories->selectDistinct('category')->from($this->table);
 		$result = $getCategories->execute();

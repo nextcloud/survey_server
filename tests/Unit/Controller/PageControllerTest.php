@@ -19,41 +19,46 @@
  *
  */
 
-namespace OCA\Survey_Server\Controller;
+namespace OCA\Survey_Server\Tests\Unit\Controller;
 
+use OCA\Survey_Server\Controller\PageController;
 use OCA\Survey_Server\Service\StatisticService;
 
 use OCP\AppFramework\Http\TemplateResponse;
+use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
+use OCP\IRequest;
 
 
 class PageControllerTest extends TestCase {
 
 	private $controller;
-	/** @var  StatisticService | \PHPUnit_Framework_MockObject_MockObject */
+	/** @var  StatisticService|MockObject */
 	private $statisticService;
 
 	public function setUp() {
-		$request = $this->getMockBuilder('OCP\IRequest')->getMock();
-		$this->statisticService = $this->getMockBuilder('OCA\Survey_Server\Service\StatisticService')
-			->disableOriginalConstructor()->getMock();
+		/** @var IRequest $request */
+		$request = $this->createMock(IRequest::class);
+		$this->statisticService = $this->createMock(StatisticService::class);
 
 		$this->controller = new PageController(
-			'survey_server', $request, $this->statisticService
+			'survey_server',
+			$request,
+			$this->statisticService
 		);
 	}
 
 
-	public function testIndex() {
-
-		$this->statisticService->expects($this->once())->method('get')
+	public function testIndex(): void {
+		$this->statisticService->expects($this->once())
+			->method('get')
 			->willReturn(['stat1' => 42]);
 
 		$result = $this->controller->index();
 
 		$this->assertEquals(['statistics' => ['stat1' => 42]], $result->getParams());
 		$this->assertEquals('main', $result->getTemplateName());
-		$this->assertTrue($result instanceof TemplateResponse);
+		$this->assertInstanceOf(TemplateResponse::class, $result);
 	}
 
 }

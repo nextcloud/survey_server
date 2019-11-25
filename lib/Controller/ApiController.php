@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
  *
@@ -19,24 +20,21 @@
  *
  */
 
-
 namespace OCA\Survey_Server\Controller;
 
 
 use OCA\Survey_Server\Service\StatisticService;
-use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
 class ApiController extends \OCP\AppFramework\ApiController {
 
-	/**
-	 * @param string $AppName
-	 * @param IRequest $request
-	 * @param StatisticService $service
-	 */
-	public function __construct($AppName, IRequest $request,
-								StatisticService $service){
+	/** @var StatisticService */
+	protected $service;
+
+	public function __construct(string $AppName,
+								IRequest $request,
+								StatisticService $service) {
 		parent::__construct($AppName, $request);
 		$this->service = $service;
 	}
@@ -47,7 +45,7 @@ class ApiController extends \OCP\AppFramework\ApiController {
 	 *
 	 * @return DataResponse
 	 */
-	public function get() {
+	public function get(): DataResponse {
 		$result = $this->service->get();
 		return new DataResponse($result);
 	}

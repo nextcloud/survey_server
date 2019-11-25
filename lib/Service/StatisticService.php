@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
  * @author Joas Schilling <coding@schilljs.com>
@@ -20,7 +21,6 @@
  *
  */
 
-
 namespace OCA\Survey_Server\Service;
 
 use OCP\IConfig;
@@ -34,14 +34,11 @@ class StatisticService {
 	/** @var IConfig */
 	protected $config;
 
-	/** @var string	*/
+	/** @var string */
 	protected $table = 'survey_results';
 
-	/**
-	 * @param IDBConnection $connection
-	 * @param IConfig $config
-	 */
-	public function __construct(IDBConnection $connection, IConfig $config) {
+	public function __construct(IDBConnection $connection,
+								IConfig $config) {
 		$this->connection = $connection;
 		$this->config = $config;
 	}
@@ -51,7 +48,7 @@ class StatisticService {
 	 *
 	 * @param array $data
 	 */
-	public function add($data) {
+	public function add(array $data): void {
 		$source = $data['id'];
 		$timestamp = time();
 
@@ -83,7 +80,7 @@ class StatisticService {
 	 *
 	 * @param string $source
 	 */
-	protected function removeOldStatistics($source) {
+	protected function removeOldStatistics(string $source): void {
 		$query = $this->connection->getQueryBuilder();
 		$query->delete($this->table)
 			->where($query->expr()->eq('source', $query->createNamedParameter($source)))
@@ -96,7 +93,7 @@ class StatisticService {
 	 *
 	 * @return array
 	 */
-	public function get() {
+	public function get(): array {
 		$data = $this->config->getAppValue('survey_server', 'evaluated_statistics', '[]');
 		$result = json_decode($data, true);
 		if($result === null) {
