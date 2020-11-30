@@ -11,4 +11,7 @@
     <dependencies>
         <nextcloud min-version="9" max-version="14"/>
     </dependencies>
+    <background-jobs>
+        <job>OCA\Survey_Server\BackgroundJobs\ComputeStatistics</job>
+    </background-jobs>
 </info>
