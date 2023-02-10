@@ -18,20 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-script('survey_server', 'script');
-vendor_script('survey_server', 'Chart');
-style('survey_server', 'style');
+
+use OCP\Util;
+
+Util::addStyle('survey_server', 'style');
+Util::addScript('survey_server', 'script');
+Util::addScript('survey_server', 'vendor/Chart');
 ?>
+<div id="app-navigation">
+    <?php print_unescaped($this->inc('part.navigation')); ?>
+    <?php print_unescaped($this->inc('part.settings')); ?>
+</div>
 
-<div id="app">
-	<div id="app-navigation">
-		<?php print_unescaped($this->inc('part.navigation')); ?>
-		<?php print_unescaped($this->inc('part.settings')); ?>
-	</div>
-
-	<div id="app-content">
-		<div id="app-content-wrapper">
-			<?php print_unescaped($this->inc('part.content')); ?>
-		</div>
-	</div>
+<div id="app-content">
+    <?php print_unescaped($this->inc('part.content')); ?>
 </div>

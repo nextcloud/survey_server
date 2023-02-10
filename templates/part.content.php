@@ -19,6 +19,7 @@
  *
  */
 ?>
+
 <div id="surveyResults">
 
 	<?php if(empty($_['statistics'])) { ?>
@@ -105,3 +106,4 @@
 		<?php } ?>
 	<?php } ?>
 </div>
+

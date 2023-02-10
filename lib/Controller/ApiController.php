@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
+ * @author Marcel Scherello <survey@scherello.de>
  *
  * @copyright Copyright (c) 2016, ownCloud, Inc.
  * @license AGPL-3.0
@@ -19,37 +20,51 @@
  *
  */
 
-
 namespace OCA\Survey_Server\Controller;
 
-
 use OCA\Survey_Server\Service\StatisticService;
-use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
-class ApiController extends \OCP\AppFramework\ApiController {
+class ApiController extends \OCP\AppFramework\ApiController
+{
 
-	/**
-	 * @param string $AppName
-	 * @param IRequest $request
-	 * @param StatisticService $service
-	 */
-	public function __construct($AppName, IRequest $request,
-								StatisticService $service){
-		parent::__construct($AppName, $request);
-		$this->service = $service;
-	}
+    /**
+     * @param string $AppName
+     * @param IRequest $request
+     * @param StatisticService $service
+     */
+    public function __construct($AppName, IRequest $request,
+                                StatisticService $service)
+    {
+        parent::__construct($AppName, $request);
+        $this->service = $service;
+    }
 
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return DataResponse
-	 */
-	public function get() {
-		$result = $this->service->get();
-		return new DataResponse($result);
-	}
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @return DataResponse
+     */
+    public function get()
+    {
+        $result = $this->service->get();
+        return new DataResponse($result);
+    }
 
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * //@ PublicPage
+     *
+     * @return DataResponse
+     */
+    public function add()
+    {
+        $params = $this->request->getParams();
+        $array = json_decode($params['data'], true);
+        $result = $this->service->add($array);
+        return new DataResponse($result);
+    }
 }

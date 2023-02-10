@@ -27,31 +27,37 @@ use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Controller;
 
-class PageController extends Controller {
+class PageController extends Controller
+{
 
-	/** @var StatisticService */
-	protected $service;
+    /** @var StatisticService */
+    protected StatisticService $service;
 
-	/**
-	 * PageController constructor.
-	 *
-	 * @param string $AppName
-	 * @param IRequest $request
-	 * @param StatisticService $service
-	 */
-	public function __construct($AppName, IRequest $request, StatisticService $service){
-		parent::__construct($AppName, $request);
+    /**
+     * PageController constructor.
+     *
+     * @param string $AppName
+     * @param IRequest $request
+     * @param StatisticService $service
+     */
+    public function __construct(
+        $AppName,
+        IRequest $request,
+        StatisticService $service
+    )
+    {
+        parent::__construct($AppName, $request);
+        $this->service = $service;
+    }
 
-		$this->service = $service;
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function index() {
-		$statistics = ['statistics' => $this->service->get()];
-		return new TemplateResponse('survey_server', 'main', $statistics);
-	}
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function index()
+    {
+        $statistics = ['statistics' => $this->service->get()];
+        return new TemplateResponse('survey_server', 'main', $statistics);
+    }
 
 }
