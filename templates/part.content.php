@@ -30,6 +30,7 @@
 		<h1>General Statistics</h1>
 
 		<p id="instances">Counted Nextcloud installations: <span></span></p>
+        <p id="lastUpdate">Last Update: <span></span></p>
 
 		<br />
 

@@ -46,8 +46,9 @@
          * @param instances how many instances are counted
          * @param users statistics about the users
          */
-        var showGeneralStatistics = function (instances, users, files) {
+        var showGeneralStatistics = function (instances, users, files, lastUpdate) {
             $('#instances span').text(formatNumber(instances));
+            $('#lastUpdate span').text(formatNumber(lastUpdate));
             $('#maxUsers span').text(formatNumber(users['max']));
             $('#minUsers span').text(formatNumber(users['min']));
             $('#averageUsers span').text(formatNumber(users['average']));
@@ -148,7 +149,7 @@
         ).done(
             function (data) {
                 if (data.length !== 0) {
-                    showGeneralStatistics(data['instances'], data['categories']['stats']['num_users']['statistics'], data['categories']['stats']['num_files']['statistics']);
+                    showGeneralStatistics(data['instances'], data['categories']['stats']['num_users']['statistics'], data['categories']['stats']['num_files']['statistics'],data['lastUpdate']);
                     appsChart(data['apps']);
 
                     for (category in data['categories']) {

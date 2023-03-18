@@ -52,13 +52,14 @@ class ComputeStatistics extends TimedJob
         $this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
         $this->config = $config = $config ? $config : \OC::$server->getConfig();
         $this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
-        $this->setInterval(60 * 60);
+        $this->setInterval(60 * 6000);
     }
 
     protected function run($argument)
     {
+        /* This section is not needed anymore. due to performance tweaks, everything will run every time
 
-        $lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', '');
+         * $lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', '');
         $newResult = json_decode($lastResult, true);
 
         if (!isset($newResult['lastRun'])) {
@@ -69,12 +70,15 @@ class ComputeStatistics extends TimedJob
         $lastRun['categories'] = isset($newResult['lastRun']['categories']) ? (int)$newResult['lastRun']['categories'] : 0;
         $lastRun['apps'] = isset($newResult['lastRun']['apps']) ? (int)$newResult['lastRun']['apps'] : 0;
 
-        $selected = array_keys($lastRun, min($lastRun));
+        $selected = array_keys($lastRun, min($lastRun));*/
 
         // this is fast, so let's run this always
         $newResult['instances'] = $this->getNumberOfInstances();
 
-        switch ($selected[0]) {
+        // store the current date as last update
+        $newResult['lastUpdate'] = date("Y/m/d h:i:sa");
+
+/*        switch ($selected[0]) {
             case 'categories':
                 $newResult['categories'] = $this->getStatisticsOfCategories();
                 $newResult['lastRun']['categories'] = time();
@@ -83,7 +87,10 @@ class ComputeStatistics extends TimedJob
                 $newResult['apps'] = $this->getApps();
                 $newResult['lastRun']['apps'] = time();
                 break;
-        }
+        }*/
+
+        $newResult['categories'] = $this->getStatisticsOfCategories();
+        $newResult['apps'] = $this->getApps();
 
         $this->config->setAppValue('survey_server', 'evaluated_statistics', json_encode($newResult));
     }
