@@ -11,6 +11,11 @@
     <dependencies>
         <nextcloud min-version="20" max-version="25"/>
     </dependencies>
+    <settings>
+        <admin-section>OCA\Survey_Server\Settings\AdminSection</admin-section>
+        <admin>OCA\Survey_Server\Settings\Admin</admin>
+    </settings>
+
     <background-jobs>
         <job>OCA\Survey_Server\BackgroundJobs\ComputeStatistics</job>
     </background-jobs>

@@ -27,16 +27,16 @@
          * calculate random color for the charts
          * @returns {string}
          */
-        var getRandomColor = function () {
-            var letters = '0123456789ABCDEF'.split('');
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
+        let getRandomColor = function () {
+            let letters = '0123456789ABCDEF'.split('');
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
                 color += letters[Math.floor(Math.random() * 16)];
             }
             return color;
         };
 
-        var formatNumber = function (number) {
+        let formatNumber = function (number) {
             number = number.toString();
             return number.replace(/(\d)(?=(\d{3})+(\.|$))/g, '$1,');
         };
@@ -45,8 +45,10 @@
          * add general statistics to the page
          * @param instances how many instances are counted
          * @param users statistics about the users
+         * @param files
+         * @param lastUpdate
          */
-        var showGeneralStatistics = function (instances, users, files, lastUpdate) {
+        let showGeneralStatistics = function (instances, users, files, lastUpdate) {
             $('#instances span').text(formatNumber(instances));
             $('#lastUpdate span').text(formatNumber(lastUpdate));
             $('#maxUsers span').text(formatNumber(users['max']));
@@ -57,16 +59,15 @@
             $('#minFiles span').text(formatNumber(files['min']));
             $('#averageFiles span').text(formatNumber(files['average']));
             $('#totalFiles span').text(formatNumber(files['total']));
-
         };
 
         /**
          * add general statistics to the page
-         * @param instances how many instances are counted
-         * @param users statistics about the users
+         * @param id
+         * @param data
          */
-        var ocNumericStatistics = function (id, data) {
-            if (id.substring(0, 3) == 'php' || id.substring(0, 8) == 'database') {
+        let ocNumericStatistics = function (id, data) {
+            if (id.substring(0, 3) === 'php' || id.substring(0, 8) === 'database') {
                 $('#' + id + 'Max span').text(OC.Util.humanFileSize(data['max']));
                 $('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
                 $('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
@@ -82,14 +83,14 @@
         /**
          * draw the chart of enabled apps
          *
-         * @param array data
+         * @param data
          */
-        var appsChart = function (data) {
-            var appLabels = [],
+        let appsChart = function (data) {
+            let appLabels = [],
                 appValues = [],
                 numApps = 0,
                 $details = $('#appDetails');
-            for (var key in data) {
+            for (let key in data) {
                 $details.append($('<span>').text(key + ': ' + data[key]));
                 $details.append($('<br>'));
 
@@ -100,7 +101,7 @@
                 }
             }
 
-            var appData = {
+            let appData = {
                 labels: appLabels,
                 datasets: [
                     {
@@ -114,20 +115,21 @@
                 ]
             };
 
-            var ctx = document.getElementById("appChart").getContext("2d");
-            var myBarChart = new Chart(ctx).Bar(appData);
+            let ctx = document.getElementById("appChart").getContext("2d");
+            //let myBarChart = new Chart(ctx).Bar(appData);
         };
 
         /**
          * draw the chart of Nextcloud versions
          *
-         * @param array data
+         * @param id
+         * @param data
          */
-        var ocChart = function (id, data) {
-            var ocChartData = new Array(),
+        let ocChart = function (id, data) {
+            let ocChartData = [],
                 $details = $('#' + id + 'Details');
 
-            for (key in data) {
+            for (let key in data) {
                 $details.append($('<span>').text(key + ': ' + data[key]));
                 $details.append($('<br>'));
 
@@ -140,8 +142,8 @@
                 );
 
             }
-            var ctx = document.getElementById(id + 'Chart').getContext("2d");
-            var myPieChart = new Chart(ctx).Pie(ocChartData);
+            let ctx = document.getElementById(id + 'Chart').getContext("2d");
+            let myPieChart = new Chart(ctx).Pie(ocChartData);
         };
 
         $.get(
@@ -152,8 +154,8 @@
                     showGeneralStatistics(data['instances'], data['categories']['stats']['num_users']['statistics'], data['categories']['stats']['num_files']['statistics'],data['lastUpdate']);
                     appsChart(data['apps']);
 
-                    for (category in data['categories']) {
-                        for (key in data['categories'][category]) {
+                    for (let category in data['categories']) {
+                        for (let key in data['categories'][category]) {
                             if (key !== 'stats') {
                                 if (data['categories'][category][key]['presentation'] === 'diagram') {
                                     ocChart((category + key).replace('.', '-'), data['categories'][category][key]['statistics']);
