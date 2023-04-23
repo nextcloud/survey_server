@@ -23,7 +23,8 @@ use OCP\Util;
 
 Util::addStyle('survey_server', 'style');
 Util::addScript('survey_server', 'script');
-Util::addScript('survey_server', 'vendor/chart');
+//Util::addScript('survey_server', 'vendor/chart');
+Util::addScript('survey_server', 'vendor/chart.min');
 ?>
 <div id="app-navigation">
     <?php print_unescaped($this->inc('part.navigation')); ?>

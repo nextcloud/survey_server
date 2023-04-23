@@ -101,22 +101,29 @@
                 }
             }
 
-            let appData = {
+            let chartData = {
                 labels: appLabels,
                 datasets: [
                     {
                         label: "Enabled Apps (in %)",
-                        fillColor: "rgba(151,187,205,0.5)",
-                        strokeColor: "rgba(151,187,205,0.8)",
-                        highlightFill: "rgba(151,187,205,0.75)",
-                        highlightStroke: "rgba(151,187,205,1)",
+                        backgroundColor: "rgba(151,187,205,0.5)",
                         data: appValues
                     }
                 ]
             };
 
-            let ctx = document.getElementById("appChart").getContext("2d");
-            //let myBarChart = new Chart(ctx).Bar(appData);
+            let ctx = document.getElementById('appChart').getContext("2d");
+            let myPieChart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
         };
 
         /**
@@ -125,46 +132,45 @@
          * @param id
          * @param data
          */
-        let ocChart = function (id, data) {
-            let ocChartData = [],
-                $details = $('#' + id + 'Details');
+        let ocChart = function (id, rawdata) {
+            let chartLabels = [];
+            let data = [];
+            let backgroundColor = [];
+            let $details = $('#' + id + 'Details'); // text output
+            let colors = ["#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5"];
+            let counter = 0;
 
-            for (let key in data) {
-                $details.append($('<span>').text(key + ': ' + data[key]));
+            for (let key in rawdata) {
+                let colorIndex = counter - (Math.floor(counter / colors.length) * colors.length)
+                $details.append($('<span>').text(key + ': ' + rawdata[key]));
                 $details.append($('<br>'));
 
-                ocChartData.push(
-                    {
-                        value: data[key],
-                        color: getRandomColor(),
-                        label: key
-                    }
-                );
-
+                chartLabels.push(key);
+                data.push(rawdata[key]);
+                backgroundColor.push(colors[colorIndex]);
+                counter++;
             }
 
-            let chartOptions = {
-                tooltips: {
-                    callbacks: {
-                        label: function (tooltipItem, data) {
-//                        let datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
-                            let datasetLabel = data.datasets[tooltipItem.datasetIndex].label || data.labels[tooltipItem.index];
-                            if (tooltipItem['yLabel'] !== '') {
-                                return datasetLabel + ': ' + parseFloat(tooltipItem['yLabel']).toLocaleString();
-                            } else {
-                                return datasetLabel;
-                            }
-                        }
-                    }
-                },
-             };
-
+            let chartData = {
+                labels: chartLabels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColor
+                }]
+            };
 
             let ctx = document.getElementById(id + 'Chart').getContext("2d");
             let myPieChart = new Chart(ctx, {
-                options: chartOptions
-                }).Pie(ocChartData);
-
+                type: 'pie',
+                data: chartData,
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
         };
 
         $.get(

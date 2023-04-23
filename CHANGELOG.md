@@ -6,6 +6,7 @@
 - store and show last update in dashboard
 - automated data cleanup and performance optimization
 - Admin settings
+- Chart.js v3.9.1
 
 owncloud-popularitycontestserver (0.0.1)
 * First release
