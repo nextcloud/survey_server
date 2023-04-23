@@ -1,6 +1,6 @@
 /**
  * @author Björn Schießle <schiessle@owncloud.com>
- * @author Marcel Scherello <survey@scherello.de>
+ * @author Marcel Scherello <surveyserver@scherello.de>
  *
  * @copyright Copyright (c) 2015, ownCloud, Inc.
  * @license AGPL-3.0

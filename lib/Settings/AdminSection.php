@@ -1,13 +1,12 @@
 <?php
 /**
  * Survey Server
- * @author Marcel Scherello <survey@scherello.de>
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE.md file.
  *
- * @author Marcel Scherello <audioplayer@scherello.de>
- * @copyright 2016-2021 Marcel Scherello
+ * @author Marcel Scherello <surveyserver@scherello.de>
+ * @copyright 2023 Marcel Scherello
  */
 
 namespace OCA\Survey_Server\Settings;

@@ -1,16 +1,14 @@
 <?php
-
-declare(strict_types=1);
-
 /**
- * Survey_Server
+ * Survey Server
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE.md file.
  *
- * @author Marcel Scherello <survey@scherello.de>
+ * @author Marcel Scherello <surveyserver@scherello.de>
+ * @copyright 2023 Marcel Scherello
  */
-
+declare(strict_types=1);
 
 namespace OCA\Survey_Server\Migration;
 
