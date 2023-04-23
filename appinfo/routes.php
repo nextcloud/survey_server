@@ -32,6 +32,9 @@ return [
 	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 	   ['name' => 'page#do_echo', 'url' => '/echo', 'verb' => 'POST'],
 
+        // settings
+        ['name' => 'settings#update', 'url' => '/settings', 'verb' => 'POST'],
+
 		// api
 		['name' => 'api#add', 'url' => '/api/v1/data', 'verb' => 'POST'],
 		['name' => 'api#get', 'url' => '/api/v1/data', 'verb' => 'GET']

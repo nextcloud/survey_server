@@ -65,26 +65,30 @@ class ComputeStatistics extends TimedJob
         $this->setInterval(60 * 60);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function run($argument)
     {
         // clean old data based on admin setting
-        $this->logger->error('cleanup');
+        $this->logger->error('cleanup old data');
         $newResult['deleted'] = $this->cleanOldData();
 
         // store the current date as last update
         $newResult['lastUpdate'] = date("Y/m/d h:i:sa");
 
         // this is fast, so let's run this always
-        $this->logger->error('instances');
+        $this->logger->error('computing instances');
         $newResult['instances'] = $this->getNumberOfInstances();
 
-        $this->logger->error('categories');
+        $this->logger->error('computing categories');
         $newResult['categories'] = $this->getStatisticsOfCategories();
 
-        $this->logger->error('apps');
+        $this->logger->error('computing apps');
         $newResult['apps'] = $this->getApps();
 
         $this->config->setAppValue('survey_server', 'evaluated_statistics', json_encode($newResult));
+        $this->logger->error('computing done');
     }
 
     /**
@@ -104,6 +108,9 @@ class ComputeStatistics extends TimedJob
         return (int)$result['instances'];
     }
 
+    /**
+     * @throws Exception
+     */
     private function getStatisticsOfCategories(): array
     {
         $categories = $this->getCategories();
@@ -148,7 +155,7 @@ class ComputeStatistics extends TimedJob
     {
         $getCategories = $this->connection->getQueryBuilder();
         $getCategories->selectDistinct('category')->from($this->table);
-        $result = $getCategories->execute();
+        $result = $getCategories->executeQuery();
         $categories = $result->fetchAll();
         $result->closeCursor();
 
@@ -170,7 +177,7 @@ class ComputeStatistics extends TimedJob
         $getKeys->selectDistinct('key')
             ->from($this->table)
             ->where($getKeys->expr()->eq('category', $getKeys->createNamedParameter($category)));
-        $result = $getKeys->execute();
+        $result = $getKeys->executeQuery();
         $keys = $result->fetchAll();
         $result->closeCursor();
 
@@ -179,6 +186,9 @@ class ComputeStatistics extends TimedJob
         }, $keys);
     }
 
+    /**
+     * @throws Exception
+     */
     private function getStatisticsDiagram($category, $key): array
     {
         $query = $this->connection->getQueryBuilder();
@@ -189,7 +199,7 @@ class ComputeStatistics extends TimedJob
             ->where($query->expr()->eq('category', $query->createNamedParameter($category)))
             ->andWhere($query->expr()->eq('key', $query->createNamedParameter($key)))
             ->addGroupBy('value')
-            ->execute();
+            ->executeQuery();
         $values = $result->fetchAll();
         $result->closeCursor();
 
@@ -206,6 +216,9 @@ class ComputeStatistics extends TimedJob
         return $statistics;
     }
 
+    /**
+     * @throws Exception
+     */
     private function getNumericalEvaluatedStatistics($category, $key)
     {
         $query = $this->connection->getQueryBuilder();
@@ -215,7 +228,7 @@ class ComputeStatistics extends TimedJob
             ->from($this->table)
             ->where($query->expr()->eq('key', $query->createNamedParameter($key)))
             ->andWhere($query->expr()->eq('category', $query->createNamedParameter($category)))
-            ->execute();
+            ->executeQuery();
         $data = $result->fetchAll();
         $data[0]['average'] = round((float)$data[0]['average'], 2);
         $statistics = $data[0];
@@ -282,7 +295,7 @@ class ComputeStatistics extends TimedJob
             ->where($query->expr()->eq('category', $query->createNamedParameter('apps')))
             ->andWhere($query->expr()->neq('value', $query->createNamedParameter('disabled')))
             ->addGroupBy('key')
-            ->execute();
+            ->executeQuery();
         $keys = $result->fetchAll();
         $result->closeCursor();
 
@@ -307,16 +320,18 @@ class ComputeStatistics extends TimedJob
     }
 
 
+    /**
+     * @throws Exception
+     */
     private function cleanOldData()
     {
-        $years = $this->config->getAppValue('survey_server', 'deletion_years', '3');
+        $years = $this->config->getAppValue('survey_server', 'deletion_time', '99');
         $timestamp = time(); // Get the current timestamp
         $new_timestamp = strtotime("-$years years", $timestamp);
 
         $sql = $this->connection->getQueryBuilder();
         $sql->delete($this->table)
             ->where($sql->expr()->lt('timestamp', $sql->createNamedParameter($new_timestamp)));
-        $statement = $sql->executeStatement();
-        return $statement;
+        return $sql->executeStatement();
     }
 }

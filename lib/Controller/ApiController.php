@@ -56,7 +56,7 @@ class ApiController extends \OCP\AppFramework\ApiController
     /**
      * @NoAdminRequired
      * @NoCSRFRequired
-     * //@ PublicPage
+     * @PublicPage
      *
      * @return DataResponse
      */

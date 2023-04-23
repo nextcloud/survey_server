@@ -69,14 +69,14 @@
         let ocNumericStatistics = function (id, data) {
             if (id.substring(0, 3) === 'php' || id.substring(0, 8) === 'database') {
                 $('#' + id + 'Max span').text(OC.Util.humanFileSize(data['max']));
-                $('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
+                //$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
                 $('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
-                $('#' + id + 'Total span').text(OC.Util.humanFileSize(data['total']));
+                //$('#' + id + 'Total span').text(OC.Util.humanFileSize(data['total']));
             } else {
                 $('#' + id + 'Max span').text(formatNumber(data['max']));
-                $('#' + id + 'Min span').text(formatNumber(data['min']));
+                //$('#' + id + 'Min span').text(formatNumber(data['min']));
                 $('#' + id + 'Average span').text(formatNumber(data['average']));
-                $('#' + id + 'Total span').text(formatNumber(data['total']));
+                //$('#' + id + 'Total span').text(formatNumber(data['total']));
             }
         };
 
@@ -142,8 +142,29 @@
                 );
 
             }
+
+            let chartOptions = {
+                tooltips: {
+                    callbacks: {
+                        label: function (tooltipItem, data) {
+//                        let datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                            let datasetLabel = data.datasets[tooltipItem.datasetIndex].label || data.labels[tooltipItem.index];
+                            if (tooltipItem['yLabel'] !== '') {
+                                return datasetLabel + ': ' + parseFloat(tooltipItem['yLabel']).toLocaleString();
+                            } else {
+                                return datasetLabel;
+                            }
+                        }
+                    }
+                },
+             };
+
+
             let ctx = document.getElementById(id + 'Chart').getContext("2d");
-            let myPieChart = new Chart(ctx).Pie(ocChartData);
+            let myPieChart = new Chart(ctx, {
+                options: chartOptions
+                }).Pie(ocChartData);
+
         };
 
         $.get(

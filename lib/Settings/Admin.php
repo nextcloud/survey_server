@@ -38,7 +38,7 @@ class Admin implements ISettings
     {
 
         $parameters = [
-            'deletion_years' => $this->configManager->getAppValue('survey_server', 'deletion_years', '99')
+            'deletion_time' => $this->configManager->getAppValue('survey_server', 'deletion_time', '99')
         ];
         return new TemplateResponse('survey_server', 'settings/admin', $parameters, '');
     }
