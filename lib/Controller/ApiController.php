@@ -28,6 +28,7 @@ use OCP\IRequest;
 
 class ApiController extends \OCP\AppFramework\ApiController
 {
+    private StatisticService $service;
 
     /**
      * @param string $AppName
