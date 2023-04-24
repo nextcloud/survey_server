@@ -17,8 +17,7 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
-class SettingsController extends Controller
-{
+class SettingsController extends Controller {
 
     private LoggerInterface $logger;
     private SettingsService $SettingsService;
