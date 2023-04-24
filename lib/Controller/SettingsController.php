@@ -20,7 +20,6 @@ use Psr\Log\LoggerInterface;
 class SettingsController extends Controller
 {
 
-    /** @var LoggerInterface */
     private LoggerInterface $logger;
     private SettingsService $SettingsService;
 
