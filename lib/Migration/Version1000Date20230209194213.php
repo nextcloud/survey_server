@@ -68,12 +68,4 @@ class Version1000Date20230209194213 extends SimpleMigrationStep
         return $schema;
     }
 
-    /**
-     * @param IOutput $output
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-     * @param array $options
-     */
-    public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void
-    {
-    }
 }
