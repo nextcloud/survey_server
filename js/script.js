@@ -1,5 +1,6 @@
 /**
  * @author Björn Schießle <schiessle@owncloud.com>
+ * @author Marcel Scherello <surveyserver@scherello.de>
  *
  * @copyright Copyright (c) 2015, ownCloud, Inc.
  * @license AGPL-3.0
@@ -20,149 +21,181 @@
 
 (function ($, OC) {
 
-	$(document).ready(function () {
+    $(document).ready(function () {
 
-		/**
-		 * calculate random color for the charts
-		 * @returns {string}
-		 */
-		var getRandomColor = function() {
-			var letters = '0123456789ABCDEF'.split('');
-			var color = '#';
-			for (var i = 0; i < 6; i++ ) {
-				color += letters[Math.floor(Math.random() * 16)];
-			}
-			return color;
-		};
+        /**
+         * calculate random color for the charts
+         * @returns {string}
+         */
+        let getRandomColor = function () {
+            let letters = '0123456789ABCDEF'.split('');
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        };
 
-		var formatNumber = function(number) {
-			number = number.toString();
-			return number.replace(/(\d)(?=(\d{3})+(\.|$))/g, '$1,');
-		};
+        let formatNumber = function (number) {
+            number = number.toString();
+            return number.replace(/(\d)(?=(\d{3})+(\.|$))/g, '$1,');
+        };
 
-		/**
-		 * add general statistics to the page
-		 * @param instances how many instances are counted
-		 * @param users statistics about the users
-		 */
-		var showGeneralStatistics = function(instances, users, files) {
-			$('#instances span').text(formatNumber(instances));
-			$('#maxUsers span').text(formatNumber(users['max']));
-			$('#minUsers span').text(formatNumber(users['min']));
-			$('#averageUsers span').text(formatNumber(users['average']));
-			$('#totalUsers span').text(formatNumber(users['total']));
-			$('#maxFiles span').text(formatNumber(files['max']));
-			$('#minFiles span').text(formatNumber(files['min']));
-			$('#averageFiles span').text(formatNumber(files['average']));
-			$('#totalFiles span').text(formatNumber(files['total']));
+        /**
+         * add general statistics to the page
+         * @param instances how many instances are counted
+         * @param users statistics about the users
+         * @param files
+         * @param lastUpdate
+         */
+        let showGeneralStatistics = function (instances, users, files, lastUpdate) {
+            $('#instances span').text(formatNumber(instances));
+            $('#lastUpdate span').text(formatNumber(lastUpdate));
+            $('#maxUsers span').text(formatNumber(users['max']));
+            $('#minUsers span').text(formatNumber(users['min']));
+            $('#averageUsers span').text(formatNumber(users['average']));
+            $('#totalUsers span').text(formatNumber(users['total']));
+            $('#maxFiles span').text(formatNumber(files['max']));
+            $('#minFiles span').text(formatNumber(files['min']));
+            $('#averageFiles span').text(formatNumber(files['average']));
+            $('#totalFiles span').text(formatNumber(files['total']));
+        };
 
-		};
+        /**
+         * add general statistics to the page
+         * @param id
+         * @param data
+         */
+        let ocNumericStatistics = function (id, data) {
+            if (id.substring(0, 3) === 'php' || id.substring(0, 8) === 'database') {
+                $('#' + id + 'Max span').text(OC.Util.humanFileSize(data['max']));
+                //$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
+                $('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
+                //$('#' + id + 'Total span').text(OC.Util.humanFileSize(data['total']));
+            } else {
+                $('#' + id + 'Max span').text(formatNumber(data['max']));
+                //$('#' + id + 'Min span').text(formatNumber(data['min']));
+                $('#' + id + 'Average span').text(formatNumber(data['average']));
+                //$('#' + id + 'Total span').text(formatNumber(data['total']));
+            }
+        };
 
-		/**
-		 * add general statistics to the page
-		 * @param instances how many instances are counted
-		 * @param users statistics about the users
-		 */
-		var ocNumericStatistics = function(id, data) {
-			if (id.substring(0, 3) == 'php' || id.substring(0, 8) == 'database') {
-				$('#' + id + 'Max span').text(OC.Util.humanFileSize(data['max']));
-				$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
-				$('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
-				$('#' + id + 'Total span').text(OC.Util.humanFileSize(data['total']));
-			} else {
-				$('#' + id + 'Max span').text(formatNumber(data['max']));
-				$('#' + id + 'Min span').text(formatNumber(data['min']));
-				$('#' + id + 'Average span').text(formatNumber(data['average']));
-				$('#' + id + 'Total span').text(formatNumber(data['total']));
-			}
-		};
+        /**
+         * draw the chart of enabled apps
+         *
+         * @param data
+         */
+        let appsChart = function (data) {
+            let appLabels = [],
+                appValues = [],
+                numApps = 0,
+                $details = $('#appDetails');
+            for (let key in data) {
+                $details.append($('<span>').text(key + ': ' + data[key]));
+                $details.append($('<br>'));
 
-		/**
-		 * draw the chart of enabled apps
-		 *
-		 * @param array data
-		 */
-		var appsChart = function (data) {
-			var appLabels = [],
-				appValues = [],
-				numApps = 0,
-				$details = $('#appDetails');
-			for (var key in data) {
-				$details.append($('<span>').text(key + ': ' + data[key]));
-				$details.append($('<br>'));
+                if (numApps < 75) {
+                    appLabels.push(key);
+                    appValues.push(100 * data[key] / (data['survey_client']));
+                    numApps++;
+                }
+            }
 
-				if (numApps < 75) {
-					appLabels.push(key);
-					appValues.push(100 * data[key] / (data['survey_client']));
-					numApps++;
-				}
-			}
+            let chartData = {
+                labels: appLabels,
+                datasets: [
+                    {
+                        label: "Enabled Apps (in %)",
+                        backgroundColor: "rgba(151,187,205,0.5)",
+                        data: appValues
+                    }
+                ]
+            };
 
-			var appData = {
-				labels: appLabels,
-				datasets: [
-					{
-						label: "Enabled Apps (in %)",
-						fillColor: "rgba(151,187,205,0.5)",
-						strokeColor: "rgba(151,187,205,0.8)",
-						highlightFill: "rgba(151,187,205,0.75)",
-						highlightStroke: "rgba(151,187,205,1)",
-						data: appValues
-					}
-				]
-			};
+            let ctx = document.getElementById('appChart').getContext("2d");
+            let myPieChart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        };
 
-			var ctx = document.getElementById("appChart").getContext("2d");
-			var myBarChart = new Chart(ctx).Bar(appData);
-		};
+        /**
+         * draw the chart of Nextcloud versions
+         *
+         * @param id
+         * @param data
+         */
+        let ocChart = function (id, rawdata) {
+            let chartLabels = [];
+            let data = [];
+            let backgroundColor = [];
+            let $details = $('#' + id + 'Details'); // text output
+            let colors = ["#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5"];
+            let counter = 0;
 
-		/**
-		 * draw the chart of ownCloud versions
-		 *
-		 * @param array data
-		 */
-		var ocChart = function (id, data) {
-			var ocChartData = new Array(),
-				$details = $('#' + id + 'Details');
+            for (let key in rawdata) {
+                let colorIndex = counter - (Math.floor(counter / colors.length) * colors.length)
+                $details.append($('<span>').text(key + ': ' + rawdata[key]));
+                $details.append($('<br>'));
 
-			for (key in data) {
-				$details.append($('<span>').text(key + ': ' + data[key]));
-				$details.append($('<br>'));
+                chartLabels.push(key);
+                data.push(rawdata[key]);
+                backgroundColor.push(colors[colorIndex]);
+                counter++;
+            }
 
-				ocChartData.push(
-					{
-						value: data[key],
-						color: getRandomColor(),
-						label: key
-					}
-				);
+            let chartData = {
+                labels: chartLabels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColor
+                }]
+            };
 
-			}
-			var ctx = document.getElementById(id + 'Chart').getContext("2d");
-			var myPieChart = new Chart(ctx).Pie(ocChartData);
-		};
+            let ctx = document.getElementById(id + 'Chart').getContext("2d");
+            let myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: chartData,
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        };
 
-		$.get(
-			OC.generateUrl('/apps/survey_server/api/v1/data'), {}
-		).done(
-			function (data) {
-				showGeneralStatistics(data['instances'], data['categories']['stats']['num_users']['statistics'], data['categories']['stats']['num_files']['statistics']);
-				appsChart(data['apps']);
+        $.get(
+            OC.generateUrl('/apps/survey_server/api/v1/data'), {}
+        ).done(
+            function (data) {
+                if (data.length !== 0) {
+                    showGeneralStatistics(data['instances'], data['categories']['stats']['num_users']['statistics'], data['categories']['stats']['num_files']['statistics'],data['lastUpdate']);
+                    appsChart(data['apps']);
 
-				for (category in data['categories']) {
-					for(key in data['categories'][category]) {
-						if (key !== 'stats') {
-							if (data['categories'][category][key]['presentation'] === 'diagram') {
-								ocChart((category + key).replace('.', '-'), data['categories'][category][key]['statistics']);
-							} else if (data['categories'][category][key]['presentation'] === 'numerical evaluation') {
-								ocNumericStatistics(category + key + 'Numeric', data['categories'][category][key]['statistics']);
-							}
-						}
-					}
-				}
-			}
-		);
+                    for (let category in data['categories']) {
+                        for (let key in data['categories'][category]) {
+                            if (key !== 'stats') {
+                                if (data['categories'][category][key]['presentation'] === 'diagram') {
+                                    ocChart((category + key).replace('.', '-'), data['categories'][category][key]['statistics']);
+                                } else if (data['categories'][category][key]['presentation'] === 'numerical evaluation') {
+                                    ocNumericStatistics(category + key + 'Numeric', data['categories'][category][key]['statistics']);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
 
-	});
+    });
 
 })(jQuery, OC);

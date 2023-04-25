@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
+ * @author Marcel Scherello <surveyserver@scherello.de>
  *
  * @copyright Copyright (c) 2016, ownCloud, Inc.
  * @license AGPL-3.0
@@ -31,6 +32,9 @@ return [
     'routes' => [
 	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 	   ['name' => 'page#do_echo', 'url' => '/echo', 'verb' => 'POST'],
+
+        // settings
+        ['name' => 'settings#update', 'url' => '/settings', 'verb' => 'POST'],
 
 		// api
 		['name' => 'api#add', 'url' => '/api/v1/data', 'verb' => 'POST'],

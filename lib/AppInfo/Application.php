@@ -20,14 +20,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-?>
-<div id="app-settings">
-	<div id="app-settings-header">
-		<button class="settings-button"
-				data-apps-slide-toggle="#app-settings-content"
-		></button>
-	</div>
-	<div id="app-settings-content">
-		<!-- Your settings in here -->
-	</div>
-</div>
+namespace OCA\Survey_Server\AppInfo;
+
+use OCP\AppFramework\App;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
+
+class Application extends App implements IBootstrap
+{
+    public const APP_ID = 'survey_server';
+
+    public function __construct(array $urlParams = [])
+    {
+        parent::__construct(self::APP_ID, $urlParams);
+    }
+
+    public function register(IRegistrationContext $context): void
+    {
+    }
+
+    public function boot(IBootContext $context): void
+    {
+    }
+}

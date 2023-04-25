@@ -19,6 +19,7 @@
  *
  */
 ?>
+
 <div id="surveyResults">
 
 	<?php if(empty($_['statistics'])) { ?>
@@ -29,6 +30,7 @@
 		<h1>General Statistics</h1>
 
 		<p id="instances">Counted Nextcloud installations: <span></span></p>
+        <p id="lastUpdate">Last Update: <span></span></p>
 
 		<br />
 
@@ -74,14 +76,13 @@
 				<?php if ($category === 'stats' && in_array($key, ['num_files', 'num_users'])) { continue; } ?>
 				<?php if ($value['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION) {?>
 					<h2><?php p(($value['description']));?></h2>
-					<p id="<?php p($category . $key . 'NumericMax');?>"><?php p($value['description']); ?> (largest installation): <span></span></p>
+					<p id="<?php p($category . $key . 'NumericMax');?>"><?php //p($value['description']); ?> largest installation: <span></span></p>
+					<!--<p id="<?php /*p($category . $key . 'NumericMin');*/?>"><?php /*p($value['description']); */?> (smallest installation): <span></span></p>
+					<br />-->
+					<p id="<?php p($category . $key . 'NumericAverage');?>"><?php //p($value['description']); ?> average: <span></span></p>
 					<br />
-					<p id="<?php p($category . $key . 'NumericMin');?>"><?php p($value['description']); ?> (smallest installation): <span></span></p>
-					<br />
-					<p id="<?php p($category . $key . 'NumericAverage');?>"><?php p($value['description']); ?> (average): <span></span></p>
-					<br />
-					<p id="<?php p($category . $key . 'NumericTotal');?>"><?php p($value['description']); ?> (total): <span></span></p>
-					<br />
+					<!--<p id="<?php /*p($category . $key . 'NumericTotal');*/?>"><?php /*p($value['description']); */?> (total): <span></span></p>
+					<br />-->
 				<?php } ?>
 			<?php } ?>
 
@@ -94,7 +95,7 @@
 
 							<details id="<?php p(str_replace('.', '-', $category . $key) . 'Details');?>">
 								<summary>
-									<canvas id="<?php p(str_replace('.', '-', $category . $key) . 'Chart');?>" width="400" height="300"></canvas>
+									<canvas id="<?php p(str_replace('.', '-', $category . $key) . 'Chart');?>" width="300" height="220"></canvas>
 								</summary>
 							</details>
 						</div>
@@ -105,3 +106,4 @@
 		<?php } ?>
 	<?php } ?>
 </div>
+

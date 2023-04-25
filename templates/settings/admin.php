@@ -20,14 +20,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+script('survey_server', 'settings/admin');
 ?>
-<div id="app-settings">
-	<div id="app-settings-header">
-		<button class="settings-button"
-				data-apps-slide-toggle="#app-settings-content"
-		></button>
-	</div>
-	<div id="app-settings-content">
-		<!-- Your settings in here -->
-	</div>
+
+<div class="section" id="survey_server">
+    <h2>Survey Server</h2>
+    <div>
+        <label for="deletion_time">Data older than x years will be deleted with every statistic run:</label><br>
+        <input type="text" id="deletion_time" value="<?php p($_['deletion_time']); ?>"/>
+        <br><br>
+        <button id="surveyYearsSave">Save</button>
+    </div>
+
 </div>

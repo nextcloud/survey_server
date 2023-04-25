@@ -20,14 +20,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-?>
-<div id="app-settings">
-	<div id="app-settings-header">
-		<button class="settings-button"
-				data-apps-slide-toggle="#app-settings-content"
-		></button>
-	</div>
-	<div id="app-settings-content">
-		<!-- Your settings in here -->
-	</div>
-</div>
+
+namespace OCA\Survey_Server\Service;
+
+use OCP\IConfig;
+
+class SettingsService
+{
+    /** @var IConfig */
+    protected IConfig $config;
+
+    /**
+     * @param IConfig $config
+     */
+    public function __construct(IConfig $config)
+    {
+        $this->config = $config;
+    }
+
+    public function update(int $time): int {
+        $this->config->setAppValue('survey_server', 'deletion_time', $time);
+        return $time;
+    }
+}

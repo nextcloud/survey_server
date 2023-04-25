@@ -8,17 +8,24 @@ The data set has to be JSON encoded and needs to look like:
 
 ````
 {
-    "id" : <id_computed_by_sender>,
-    "apps" : [
-                 <app1>,
-                 <app2>,
-                 ...
-             ],
-    "system" : {
-                   "phpversion" : <php_version>,
-                   "ncversion" : <nextcloud_version>,
-                   "users" : <number_of_users>
-               }
+    "id": <id_computed_by_sender>,
+    "items": [
+        [
+            "server",
+            "version",
+            "25.0.1.1"
+        ],
+        [
+            "apps",
+            <appId>,
+            <appVersion>
+        ],
+        [
+            "database",
+            "type",
+            "pgsql"
+        ],
+    ]
 }
 ````
 
@@ -32,7 +39,7 @@ will be able to evaluate more data.
 For testing purpose you can use curl to send some dummy values to the server:
 
 ````
-curl --data "data={\"id\" : \"randomID_454353\", \"apps\" : [ \"calendar\", \"deleted_files\" ], \"system\" : { \"phpversion\" : \"5.6\", \"ncversion\" : \"9.0\", \"users\" : 22 }}" https://nextcloudServer.org/index.php/apps/survey_server/api/v1/data
+curl --data "data={\"id\" : \"randomID_454354\", \"items\" : [[\"server\", \"version\", \"25.0.1.1\" ], [\"database\", \"type\", \"pgsql\" ], [\"apps\", \"files_sharing\", \"1.17.0\" ], [\"stats\", \"num_users\", 2], [\"stats\", \"num_files\", 7], [\"encryption\", \"enabled\" , \"no\"]]}" https://nextcloudServer.org/index.php/apps/survey_server/api/v1/data
 ````
 
 ## Contribute

@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Björn Schießle <bjoern@schiessle.org>
+ * @author Marcel Scherello <surveyserver@scherello.de>
  *
  * @copyright Copyright (c) 2016, ownCloud, Inc.
  * @license AGPL-3.0
@@ -19,274 +20,318 @@
  *
  */
 
-
 namespace OCA\Survey_Server\BackgroundJobs;
 
-
-use OC\BackgroundJob\TimedJob;
+use OCA\Analytics\Service\DataloadService;
+use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\TimedJob;
 use OCA\Survey_Server\EvaluateStatistics;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IDBConnection;
+use Psr\Log\LoggerInterface;
 
-class ComputeStatistics extends TimedJob {
+class ComputeStatistics extends TimedJob
+{
 
-	/** @var string	*/
-	protected $table = 'survey_results';
+    /** @var string */
+    protected $table = 'survey_results';
 
-	/** @var IDBConnection */
-	private $connection;
+    /** @var IDBConnection */
+    private $connection;
 
-	/** @var EvaluateStatistics  */
-	private $evaluateStatistics;
+    /** @var EvaluateStatistics */
+    private EvaluateStatistics $evaluateStatistics;
 
-	/** @var IConfig */
-	private $config;
+    /** @var IConfig */
+    private $config;
 
-	public function __construct(
-		IDBConnection $connection = null,
-		IConfig $config = null,
-		EvaluateStatistics $evaluateStatistics = null
-	) {
-		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
-		$this->config = $config = $config ? $config : \OC::$server->getConfig();
-		$this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
-		$this->setInterval(60 * 60);
-	}
+    /** @var LoggerInterface */
+    private LoggerInterface $logger;
 
-	protected function run($argument) {
+    public function __construct(
+        ITimeFactory       $time,
+        IDBConnection      $connection = null,
+        IConfig            $config = null,
+        EvaluateStatistics $evaluateStatistics = null,
+        LoggerInterface    $logger
+    )
+    {
+        parent::__construct($time);
+        $this->logger = $logger;
+        $this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
+        $this->config = $config = $config ? $config : \OC::$server->getConfig();
+        $this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
+        $this->setInterval(60 * 60);
+    }
 
-		$lastResult = $this->config->getAppValue('survey_server', 'evaluated_statistics', []);
-		$newResult = json_decode($lastResult, true);
+    /**
+     * @throws Exception
+     */
+    protected function run($argument)
+    {
+        // clean old data based on admin setting
+        $this->logger->error('cleanup old data');
+        $newResult['deleted'] = $this->cleanOldData();
 
-		if (!isset($newResult['lastRun'])) {
-			$newResult['lastRun'] = [];
-		}
+        // store the current date as last update
+        $newResult['lastUpdate'] = date("Y/m/d h:i:sa");
 
-		$lastRun = [];
-		$lastRun['categories'] = isset($newResult['lastRun']['categories']) ? (int)$newResult['lastRun']['categories'] : 0;
-		$lastRun['apps'] = isset($newResult['lastRun']['apps']) ? (int)$newResult['lastRun']['apps'] : 0;
+        // this is fast, so let's run this always
+        $this->logger->error('computing instances');
+        $newResult['instances'] = $this->getNumberOfInstances();
 
-		$selected = array_keys($lastRun, min($lastRun));
+        $this->logger->error('computing categories');
+        $newResult['categories'] = $this->getStatisticsOfCategories();
 
-		// this is fast, so let's run this always
-		$newResult['instances'] = $this->getNumberOfInstances();
+        $this->logger->error('computing apps');
+        $newResult['apps'] = $this->getApps();
 
-		switch ($selected[0]) {
-			case 'categories':
-				$newResult['categories'] = $this->getStatisticsOfCategories();
-				$newResult['lastRun']['categories'] = time();
-				break;
-			case 'apps':
-				$newResult['apps'] = $this->getApps();
-				$newResult['lastRun']['apps'] = time();
-				break;
-		}
+        $this->config->setAppValue('survey_server', 'evaluated_statistics', json_encode($newResult));
+        $this->logger->error('computing done');
+    }
 
-		$this->config->setAppValue('survey_server', 'evaluated_statistics', json_encode($newResult));
-	}
+    /**
+     * return number of instances stored in the database
+     *
+     * @return int
+     * @throws Exception
+     */
+    private function getNumberOfInstances(): int
+    {
+        $sql = $this->connection->getQueryBuilder();
+        $sql->select($sql->createFunction('COUNT(DISTINCT `source`) as instances'))
+            ->from($this->table);
+        $statement = $sql->executeQuery();
+        $result = $statement->fetch();
+        $statement->closeCursor();
+        return (int)$result['instances'];
+    }
 
-	/**
-	 * return number of instances stored in the database
-	 *
-	 * @return int
-	 */
-	private function getNumberOfInstances() {
-		$countInstances = $this->connection->getQueryBuilder();
-		$i = $countInstances->select($countInstances->createFunction('COUNT(DISTINCT `source`) as instances'))
-			->from($this->table)->execute()->fetch();
+    /**
+     * @throws Exception
+     */
+    private function getStatisticsOfCategories(): array
+    {
+        $categories = $this->getCategories();
+        $result = [];
+        foreach ($categories as $category) {
+            if ($category !== 'apps') {
+                $keys = $this->getKeysOfCategory($category);
+                foreach ($keys as $key) {
+                    // we don't evaluate share permissions for now
+                    if (strpos($key, 'permissions_') === 0) continue;
+                    $presentationType = $this->evaluateStatistics->getPresentationType($key);
+                    switch ($presentationType) {
+                        case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
+                            $result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
+                            $result[$category][$key]['presentation'] = $presentationType;
+                            $result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+                            break;
+                        case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
+                            $result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
+                            $result[$category][$key]['presentation'] = $presentationType;
+                            $result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
+                            break;
+                        case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
+                            break;
+                        default:
+                            throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
+                    }
+                }
+            }
+        }
 
-		return (int)$i['instances'];
-	}
+        return $result;
+    }
 
-	private function getStatisticsOfCategories() {
-		$categories = $this->getCategories();
-		$result = [];
-		foreach ($categories as $category) {
-			if ($category !== 'apps') {
-				$keys = $this->getKeysOfCategory($category);
-				foreach ($keys as $key) {
-					// we don't evaluate share permissions for now
-					if (strpos($key, 'permissions_') === 0) continue;
-					$presentationType = $this->evaluateStatistics->getPresentationType($key);
-					switch ($presentationType) {
-						case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
-							$result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
-							$result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->evaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
-							break;
-						default:
-							throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
-					}
-				}
-			}
-		}
+    /**
+     * get all categories
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function getCategories(): array
+    {
+        $getCategories = $this->connection->getQueryBuilder();
+        $getCategories->selectDistinct('category')->from($this->table);
+        $result = $getCategories->executeQuery();
+        $categories = $result->fetchAll();
+        $result->closeCursor();
 
-		return $result;
-	}
+        return array_map(function ($array) {
+            return $array['category'];
+        }, $categories);
+    }
 
-	private function getStatisticsDiagram($category, $key) {
-		$query = $this->connection->getQueryBuilder();
+    /**
+     * get all keys of a given category
+     *
+     * @param string $category
+     * @return array
+     * @throws Exception
+     */
+    private function getKeysOfCategory(string $category): array
+    {
+        $getKeys = $this->connection->getQueryBuilder();
+        $getKeys->selectDistinct('key')
+            ->from($this->table)
+            ->where($getKeys->expr()->eq('category', $getKeys->createNamedParameter($category)));
+        $result = $getKeys->executeQuery();
+        $keys = $result->fetchAll();
+        $result->closeCursor();
 
-		$result = $query
-			->select('value')
-			->from($this->table)
-			->where($query->expr()->eq('category', $query->createNamedParameter($category)))
-			->andWhere($query->expr()->eq('key', $query->createNamedParameter($key)))
-			->execute();
-		$values = $result->fetchAll();
-		$result->closeCursor();
+        return array_map(function ($array) {
+            return $array['key'];
+        }, $keys);
+    }
 
-		$statistics = [];
-		foreach ($values as $value) {
-			$name = $this->clearValue($category, $key, $value['value']);
-			if (isset($statistics[$name])) {
-				$statistics[$name] = $statistics[$name] + 1;
-			} else {
-				$statistics[$name] = 1;
-			}
-		}
+    /**
+     * @throws Exception
+     */
+    private function getStatisticsDiagram($category, $key): array
+    {
+        $query = $this->connection->getQueryBuilder();
+        $result = $query
+            ->select('value')
+            ->selectAlias($query->func()->count('source'), 'count')
+            ->from($this->table)
+            ->where($query->expr()->eq('category', $query->createNamedParameter($category)))
+            ->andWhere($query->expr()->eq('key', $query->createNamedParameter($key)))
+            ->addGroupBy('value')
+            ->executeQuery();
+        $values = $result->fetchAll();
+        $result->closeCursor();
 
-		arsort($statistics, SORT_NUMERIC);
-		return $statistics;
-	}
+        $statistics = [];
+        foreach ($values as $value) {
+            $name = $this->clearValue($category, $key, $value['value']);
+            if (isset($statistics[$name])) {
+                $statistics[$name] = $statistics[$name] + $value['count'];
+            } else {
+                $statistics[$name] = $value['count'];
+            }
+        }
+        arsort($statistics, SORT_NUMERIC);
+        return $statistics;
+    }
 
-	private function clearValue($category, $key, $value) {
-		if (strpos($key, 'memcache.') === 0) {
-			return $value !== '' ? trim($value, '\\') : 'none';
-		}
+    /**
+     * @throws Exception
+     */
+    private function getNumericalEvaluatedStatistics($category, $key)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $result = $query
+            ->select($query->createFunction('AVG(CAST(`value` AS int)) AS average, MAX(CAST(`value` AS int)) AS max, MIN(CAST(`value` AS int)) AS min'))
+            ->addSelect($query->createFunction('SUM(CAST(`value` AS int)) AS total'))
+            ->from($this->table)
+            ->where($query->expr()->eq('key', $query->createNamedParameter($key)))
+            ->andWhere($query->expr()->eq('category', $query->createNamedParameter($category)))
+            ->executeQuery();
+        $data = $result->fetchAll();
+        $data[0]['average'] = round((float)$data[0]['average'], 2);
+        $statistics = $data[0];
+        $result->closeCursor();
 
-		if ($key === 'version') {
-			$version = explode('.', $value);
-			$majorMinorVersion = $version[0] . '.' . (int) $version[1];
+        return $statistics;
+    }
 
-			if ($category === 'server') {
-				return $majorMinorVersion . '.' . $version[2];
-			}
+    private function clearValue($category, $key, $value): string
+    {
+        if (strpos($key, 'memcache.') === 0) {
+            return $value !== '' ? trim($value, '\\') : 'none';
+        }
 
-			if ($category === 'database') {
-				switch ($version[0]) {
-					case '2':
-					case '3':
-						return 'SQLite ' . $majorMinorVersion;
-					case '5':
-					case '6':
-						return 'MySQL ' . $majorMinorVersion;
-					case '10':
-					case '11':
-						return 'MariaDB ' . $majorMinorVersion;
-					default:
-						return $majorMinorVersion;
-				}
-			}
+        if ($key === 'version') {
+            $version = explode('.', $value);
+            $majorMinorVersion = $version[0] . '.' . (int)$version[1];
 
-			return $majorMinorVersion;
-		}
+            if ($category === 'server') {
+                return $majorMinorVersion . '.' . $version[2];
+            }
 
-		if ($key === 'max_execution_time') {
-			return $value . 's';
-		}
+            if ($category === 'database') {
+                switch ($version[0]) {
+                    case '2':
+                    case '3':
+                        return 'SQLite ' . $majorMinorVersion;
+                    case '5':
+                    case '6':
+                        return 'MySQL ' . $majorMinorVersion;
+                    case '10':
+                    case '11':
+                        return 'MariaDB ' . $majorMinorVersion;
+                    default:
+                        return $majorMinorVersion;
+                }
+            }
 
-		return (string) $value;
-	}
+            return $majorMinorVersion;
+        }
 
-	private function getNumericalEvaluatedStatistics($category, $key) {
+        if ($key === 'max_execution_time') {
+            return $value . 's';
+        }
 
-		$query = $this->connection->getQueryBuilder();
-		$result = $query
-			->select($query->createFunction('AVG(CAST(`value` AS SIGNED)) AS average, MAX(CAST(`value` AS SIGNED)) AS max, MIN(CAST(`value` AS SIGNED)) AS min'))
-			->addSelect($query->createFunction('SUM(CAST(`value` AS SIGNED)) AS total'))
-			->from($this->table)
-			->where($query->expr()->eq('key', $query->createNamedParameter($key)))
-			->andWhere($query->expr()->eq('category', $query->createNamedParameter($category)))
-			->execute();
-		$data = $result->fetchAll();
-		$data[0]['average'] = round((float)$data[0]['average'], 2);
-		$statistics = $data[0];
-		$result->closeCursor();
-
-		return $statistics;
-
-	}
-
-	/**
-	 * get all keys of a given category
-	 *
-	 * @param string $category
-	 * @return array
-	 */
-	private function getKeysOfCategory($category) {
-		$getKeys = $this->connection->getQueryBuilder();
-		$getKeys->selectDistinct('key')->from($this->table)
-			->where($getKeys->expr()->eq('category', $getKeys->createNamedParameter($category)));
-		$result = $getKeys->execute();
-		$keys = $result->fetchAll();
-		$result->closeCursor();
-
-		return array_map(function($array) { return $array['key']; }, $keys);
-	}
+        return (string)$value;
+    }
 
 
-	/**
-	 * get statistic of enabled apps
-	 *
-	 * @return array
-	 */
-	private function getApps() {
-		$query = $this->connection->getQueryBuilder();
+    /**
+     * get statistic of enabled apps
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function getApps(): array
+    {
+        $query = $this->connection->getQueryBuilder();
 
-		$result = $query
-			->select('key')
-			->from($this->table)
-			->where($query->expr()->eq('category', $query->createNamedParameter('apps')))
-			->andWhere($query->expr()->neq('value', $query->createNamedParameter('disabled')))
-			->execute();
-		$keys = $result->fetchAll();
-		$result->closeCursor();
+        $result = $query
+            ->select('key')
+            ->selectAlias($query->func()->count('source'), 'count')
+            ->from($this->table)
+            ->where($query->expr()->eq('category', $query->createNamedParameter('apps')))
+            ->andWhere($query->expr()->neq('value', $query->createNamedParameter('disabled')))
+            ->addGroupBy('key')
+            ->executeQuery();
+        $keys = $result->fetchAll();
+        $result->closeCursor();
 
-		$statistics = [];
-		foreach ($keys as $key) {
-			if (isset($statistics[$key['key']])) {
-				$statistics[$key['key']] = $statistics[$key['key']] + 1;
-			} else {
-				$statistics[$key['key']] = 1;
-			}
-		}
+        $statistics = [];
+        foreach ($keys as $key) {
+            if (isset($statistics[$key['key']])) {
+                $statistics[$key['key']] = $statistics[$key['key']] + $key['count'];
+            } else {
+                $statistics[$key['key']] = $key['count'];
+            }
+        }
 
-		$apps = \OC::$server->getAppManager()->getAlwaysEnabledApps();
-		$apps = array_flip($apps);
+        $apps = \OC::$server->getAppManager()->getAlwaysEnabledApps();
+        $apps = array_flip($apps);
 
-		foreach ($statistics as $key => $value) {
-			if (!isset($apps[$key])) {
-				$statistics[$key] = $value;
-			} else {
-				unset($statistics[$key]);
-			}
-		}
+        $statistics = array_filter($statistics, function($key) use ($apps) {
+            return !isset($apps[$key]);
+        }, ARRAY_FILTER_USE_KEY);
 
-		arsort($statistics);
+        arsort($statistics);
+        return $statistics;
+    }
 
-		return $statistics;
-	}
 
-	/**
-	 * get all categories
-	 *
-	 * @return array
-	 */
-	private function getCategories() {
-		$getCategories = $this->connection->getQueryBuilder();
-		$getCategories->selectDistinct('category')->from($this->table);
-		$result = $getCategories->execute();
-		$categories = $result->fetchAll();
-		$result->closeCursor();
+    /**
+     * @throws Exception
+     */
+    private function cleanOldData()
+    {
+        $years = $this->config->getAppValue('survey_server', 'deletion_time', '99');
+        $timestamp = time(); // Get the current timestamp
+        $new_timestamp = strtotime("-$years years", $timestamp);
 
-		return array_map(function($array) { return $array['category']; }, $categories);
-	}
+        $sql = $this->connection->getQueryBuilder();
+        $sql->delete($this->table)
+            ->where($sql->expr()->lt('timestamp', $sql->createNamedParameter($new_timestamp)));
+        return $sql->executeStatement();
+    }
 }
