@@ -78,7 +78,7 @@ class StatisticService
             $query->setParameter('category', $item[0])
                 ->setParameter('key', $item[1])
                 ->setParameter('value', $item[2]);
-            $query->execute();
+            $query->executeStatement();
         }
         $this->connection->commit();
     }
@@ -94,7 +94,7 @@ class StatisticService
         $query = $this->connection->getQueryBuilder();
         $query->delete($this->table)
             ->where($query->expr()->eq('source', $query->createNamedParameter($source)))
-            ->execute();
+            ->executeStatement();
     }
 
     /**

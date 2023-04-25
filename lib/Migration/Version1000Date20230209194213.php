@@ -70,12 +70,12 @@ class Version1000Date20230209194213 extends SimpleMigrationStep
             ]);
             $table->addColumn('timestamp', Types::INTEGER, [
                 'notnull' => true,
-                'length' => 4,
                 'default' => 0
             ]);
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['key', 'category'], 'sh_survey_results');
+            $table->addIndex(['key', 'category'], 'ss_survey_results');
             $table->addIndex(['source'], 'ss_source');
+            $table->addIndex(['timestamp'], 'ss_timestamp');
         }
         return $schema;
     }
