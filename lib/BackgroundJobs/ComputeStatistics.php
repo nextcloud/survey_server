@@ -62,7 +62,7 @@ class ComputeStatistics extends TimedJob
         $this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
         $this->config = $config = $config ? $config : \OC::$server->getConfig();
         $this->evaluateStatistics = $evaluateStatistics ? $evaluateStatistics : new EvaluateStatistics();
-        $this->setInterval(60 * 60);
+        $this->setInterval(60 * 60); //todo
     }
 
     /**
@@ -71,24 +71,24 @@ class ComputeStatistics extends TimedJob
     protected function run($argument)
     {
         // clean old data based on admin setting
-        $this->logger->error('cleanup old data');
+        $this->logger->info('cleanup old data');
         $newResult['deleted'] = $this->cleanOldData();
 
         // store the current date as last update
         $newResult['lastUpdate'] = date("Y/m/d h:i:sa");
 
         // this is fast, so let's run this always
-        $this->logger->error('computing instances');
+        $this->logger->info('computing instances');
         $newResult['instances'] = $this->getNumberOfInstances();
 
-        $this->logger->error('computing categories');
+        $this->logger->info('computing categories');
         $newResult['categories'] = $this->getStatisticsOfCategories();
 
-        $this->logger->error('computing apps');
+        $this->logger->info('computing apps');
         $newResult['apps'] = $this->getApps();
 
         $this->config->setAppValue('survey_server', 'evaluated_statistics', json_encode($newResult));
-        $this->logger->error('computing done');
+        $this->logger->info('computing done');
     }
 
     /**
