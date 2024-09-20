@@ -20,44 +20,41 @@
  */
 
 
-namespace OCA\Survey_Server\Controller;
+namespace OCA\SurveyServer\Controller;
 
-use OCA\Survey_Server\Service\StatisticService;
+use OCA\SurveyServer\Service\StatisticService;
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Controller;
 
-class PageController extends Controller
-{
+class PageController extends Controller {
 
-    /** @var StatisticService */
-    protected StatisticService $service;
+	/** @var StatisticService */
+	protected StatisticService $service;
 
-    /**
-     * PageController constructor.
-     *
-     * @param string $AppName
-     * @param IRequest $request
-     * @param StatisticService $service
-     */
-    public function __construct(
-        $AppName,
-        IRequest $request,
-        StatisticService $service
-    )
-    {
-        parent::__construct($AppName, $request);
-        $this->service = $service;
-    }
+	/**
+	 * PageController constructor.
+	 *
+	 * @param string $AppName
+	 * @param IRequest $request
+	 * @param StatisticService $service
+	 */
+	public function __construct(
+		$AppName,
+		IRequest $request,
+		StatisticService $service
+	) {
+		parent::__construct($AppName, $request);
+		$this->service = $service;
+	}
 
-    /**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function index()
-    {
-        $statistics = ['statistics' => $this->service->get()];
-        return new TemplateResponse('survey_server', 'main', $statistics);
-    }
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function index() {
+		$statistics = ['statistics' => $this->service->get()];
+		return new TemplateResponse('survey_server', 'main', $statistics);
+	}
 
 }

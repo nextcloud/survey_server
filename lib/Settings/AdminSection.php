@@ -21,7 +21,7 @@
  *
  */
 
-namespace OCA\Survey_Server\Settings;
+namespace OCA\SurveyServer\Settings;
 
 use OCP\IL10N;
 use OCP\IURLGenerator;

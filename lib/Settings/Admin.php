@@ -21,11 +21,11 @@
  *
  */
 
-namespace OCA\Survey_Server\Settings;
+namespace OCA\SurveyServer\Settings;
 
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Settings\ISettings;
-use OCP\IConfig;
+use OCP\IAppConfig;
 
 class Admin implements ISettings
 {
@@ -35,7 +35,7 @@ class Admin implements ISettings
 
     public function __construct(
         $userId,
-        IConfig $configManager
+		IAppConfig $configManager
     )
     {
         $this->userId = $userId;
@@ -50,7 +50,7 @@ class Admin implements ISettings
     {
 
         $parameters = [
-            'deletion_time' => $this->configManager->getAppValue('survey_server', 'deletion_time', '99')
+            'deletion_time' => $this->configManager->getValueString('survey_server', 'deletion_time', '99')
         ];
         return new TemplateResponse('survey_server', 'settings/admin', $parameters, '');
     }

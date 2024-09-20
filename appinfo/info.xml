@@ -7,17 +7,17 @@
     <author>Bjoern Schiessle</author>
     <author>Marcel Scherello</author>
     <version>1.0.0</version>
-    <namespace>Survey_Server</namespace>
+    <namespace>SurveyServer</namespace>
     <category>other</category>
     <dependencies>
         <nextcloud min-version="25" max-version="99"/>
     </dependencies>
     <settings>
-        <admin-section>OCA\Survey_Server\Settings\AdminSection</admin-section>
-        <admin>OCA\Survey_Server\Settings\Admin</admin>
+        <admin-section>OCA\SurveyServer\Settings\AdminSection</admin-section>
+        <admin>OCA\SurveyServer\Settings\Admin</admin>
     </settings>
     <background-jobs>
-        <job>OCA\Survey_Server\BackgroundJobs\ComputeStatistics</job>
+        <job>OCA\SurveyServer\BackgroundJobs\ComputeStatistics</job>
     </background-jobs>
     <navigations>
         <navigation>

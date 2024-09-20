@@ -19,9 +19,7 @@
  *
  */
 
-
-namespace OCA\Survey_Server;
-
+namespace OCA\SurveyServer;
 
 class EvaluateStatistics {
 

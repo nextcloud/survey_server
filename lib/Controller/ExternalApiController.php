@@ -19,21 +19,18 @@
  *
  */
 
-namespace OCA\Survey_Server\Controller;
+namespace OCA\SurveyServer\Controller;
 
-use OCA\Survey_Server\Service\StatisticService;
+use OCA\SurveyServer\Service\StatisticService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
-use OCP\IConfig;
 use OCP\IRequest;
 
 class ExternalApiController extends OCSController {
 
 	/** @var StatisticService */
 	private $service;
-	/** @var IConfig */
-	private $config;
 
 	/**
 	 * OCSAuthAPI constructor.
@@ -41,17 +38,14 @@ class ExternalApiController extends OCSController {
 	 * @param string $appName
 	 * @param IRequest $request
 	 * @param StatisticService $service
-	 * @param IConfig $config
 	 */
 	public function __construct(
 		$appName,
 		IRequest $request,
-		StatisticService $service,
-		IConfig $config
+		StatisticService $service
 	) {
 		parent::__construct($appName, $request);
 		$this->service = $service;
-		$this->config = $config;
 	}
 
 	/**
@@ -66,11 +60,10 @@ class ExternalApiController extends OCSController {
 	public function receiveSurveyResults(string $data) {
 
 		$array = json_decode($data, true);
-
 		$array['timestamp'] = time();
-
-		$logFile = \OC::$server->getConfig()->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
-		file_put_contents($logFile, json_encode($array). PHP_EOL, FILE_APPEND);
+		$logFile = \OC::$server->getConfig()
+							   ->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
+		file_put_contents($logFile, json_encode($array) . PHP_EOL, FILE_APPEND);
 
 		if ($array === null) {
 			return new DataResponse(['message' => 'Invalid data supplied.'], Http::STATUS_BAD_REQUEST);
@@ -83,7 +76,5 @@ class ExternalApiController extends OCSController {
 		}
 
 		return new DataResponse();
-
 	}
-
 }

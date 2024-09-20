@@ -22,93 +22,84 @@
  */
 
 
-namespace OCA\Survey_Server\Service;
+namespace OCA\SurveyServer\Service;
 
 use OCP\DB\Exception;
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\IDBConnection;
 
-class StatisticService
-{
+class StatisticService {
 
-    /** @var  IDBConnection */
-    protected IDBConnection $connection;
+	/** @var  IDBConnection */
+	protected IDBConnection $connection;
 
-    /** @var IConfig */
-    protected IConfig $config;
+	/** @var IAppConfig */
+	protected IAppConfig $config;
 
-    /** @var string */
-    protected string $table = 'survey_results';
+	/** @var string */
+	protected string $table = 'survey_results';
 
-    /**
-     * @param IDBConnection $connection
-     * @param IConfig $config
-     */
-    public function __construct(IDBConnection $connection, IConfig $config)
-    {
-        $this->connection = $connection;
-        $this->config = $config;
-    }
+	/**
+	 * @param IDBConnection $connection
+	 * @param IAppConfig $config
+	 */
+	public function __construct(IDBConnection $connection, IAppConfig $config) {
+		$this->connection = $connection;
+		$this->config = $config;
+	}
 
-    /**
-     * new add data set to database
-     *
-     * @param array $data
-     * @throws Exception
-     */
-    public function add($data)
-    {
-        $source = $data['id'];
-        $timestamp = time();
+	/**
+	 * new add data set to database
+	 *
+	 * @param array $data
+	 * @return true
+	 * @throws Exception
+	 */
+	public function add($data) {
+		$source = $data['id'];
+		$timestamp = time();
 
-        $this->connection->beginTransaction();
-        $query = $this->connection->getQueryBuilder();
-        $query->insert($this->table)
-            ->values(
-                [
-                    'source' => $query->createNamedParameter($source),
-                    'timestamp' => $query->createNamedParameter($timestamp),
-                    'category' => $query->createParameter('category'),
-                    'key' => $query->createParameter('key'),
-                    'value' => $query->createParameter('value')
-                ]
-            );
-        $this->removeOldStatistics($source);
-        foreach ($data['items'] as $item) {
-            $query->setParameter('category', $item[0])
-                ->setParameter('key', $item[1])
-                ->setParameter('value', $item[2]);
-            $query->executeStatement();
-        }
-        $this->connection->commit();
-    }
+		$this->connection->beginTransaction();
+		$query = $this->connection->getQueryBuilder();
+		$query->insert($this->table)->values([
+			'source' => $query->createNamedParameter($source),
+			'timestamp' => $query->createNamedParameter($timestamp),
+			'category' => $query->createParameter('category'),
+			'key' => $query->createParameter('key'),
+			'value' => $query->createParameter('value')
+		]);
+		$this->removeOldStatistics($source);
+		foreach ($data['items'] as $item) {
+			$query->setParameter('category', $item[0])->setParameter('key', $item[1])->setParameter('value', $item[2]);
+			$query->executeStatement();
+		}
+		$this->connection->commit();
+		return true;
+	}
 
-    /**
-     * remove old statistic from given source
-     *
-     * @param string $source
-     * @throws Exception
-     */
-    protected function removeOldStatistics(string $source)
-    {
-        $query = $this->connection->getQueryBuilder();
-        $query->delete($this->table)
-            ->where($query->expr()->eq('source', $query->createNamedParameter($source)))
-            ->executeStatement();
-    }
+	/**
+	 * remove old statistic from given source
+	 *
+	 * @param string $source
+	 * @throws Exception
+	 */
+	protected function removeOldStatistics(string $source) {
+		$query = $this->connection->getQueryBuilder();
+		$query->delete($this->table)->where($query->expr()->eq('source', $query->createNamedParameter($source)))
+			  ->executeStatement();
+	}
 
-    /**
-     * get statistics stored in the database
-     *
-     * @return array
-     */
-    public function get(): array
-    {
-        $data = $this->config->getAppValue('survey_server', 'evaluated_statistics', '[]');
-        $result = json_decode($data, true);
-        if ($result === null) {
-            return [];
-        }
-        return $result;
-    }
+	/**
+	 * get statistics stored in the database
+	 *
+	 * @return array
+	 */
+	public function get(): array {
+		$data = $this->config->getValueString('survey_server', 'evaluated_statistics');
+		$result = json_decode($data, true);
+		if ($result === null) {
+			return [];
+		}
+		return $result;
+	}
 }

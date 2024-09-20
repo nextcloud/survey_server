@@ -19,9 +19,9 @@
  *
  */
 
-namespace OCA\Survey_Server\Controller;
+namespace OCA\SurveyServer\Controller;
 
-use OCA\Survey_Server\Service\StatisticService;
+use OCA\SurveyServer\Service\StatisticService;
 
 use OCP\AppFramework\Http\TemplateResponse;
 use Test\TestCase;
@@ -35,7 +35,7 @@ class PageControllerTest extends TestCase {
 
 	public function setUp() {
 		$request = $this->getMockBuilder('OCP\IRequest')->getMock();
-		$this->statisticService = $this->getMockBuilder('OCA\Survey_Server\Service\StatisticService')
+		$this->statisticService = $this->getMockBuilder('OCA\SurveyServer\Service\StatisticService')
 			->disableOriginalConstructor()->getMock();
 
 		$this->controller = new PageController(

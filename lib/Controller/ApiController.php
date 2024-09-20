@@ -20,52 +20,54 @@
  *
  */
 
-namespace OCA\Survey_Server\Controller;
+namespace OCA\SurveyServer\Controller;
 
-use OCA\Survey_Server\Service\StatisticService;
+use OCA\SurveyServer\Service\StatisticService;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\DB\Exception;
 use OCP\IRequest;
 
-class ApiController extends \OCP\AppFramework\ApiController
-{
-    private StatisticService $service;
+class ApiController extends \OCP\AppFramework\ApiController {
+	private StatisticService $StatisticService;
 
-    /**
-     * @param string $AppName
-     * @param IRequest $request
-     * @param StatisticService $service
-     */
-    public function __construct($AppName, IRequest $request,
-                                StatisticService $service)
-    {
-        parent::__construct($AppName, $request);
-        $this->service = $service;
-    }
+	/**
+	 * @param string $AppName
+	 * @param IRequest $request
+	 * @param StatisticService $service
+	 */
+	public function __construct(
+		$AppName,
+		IRequest $request,
+		StatisticService $StatisticService
+	) {
+		parent::__construct($AppName, $request);
+		$this->StatisticService = $StatisticService;
+	}
 
-    /**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @return DataResponse
-     */
-    public function get()
-    {
-        $result = $this->service->get();
-        return new DataResponse($result);
-    }
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @return DataResponse
+	 */
+	public function get() {
+		$result = $this->StatisticService->get();
+		return new DataResponse($result);
+	}
 
-    /**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     * @PublicPage
-     *
-     * @return DataResponse
-     */
-    public function add()
-    {
-        $params = $this->request->getParams();
-        $array = json_decode($params['data'], true);
-        $result = $this->service->add($array);
-        return new DataResponse($result);
-    }
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 *
+	 * @param string $data
+	 * @return DataResponse
+	 * @throws Exception
+	 */
+	public function add(string $data) {
+		$params = $this->request->getParams();
+		$array = json_decode($data, true);
+		$result = $this->StatisticService->add($array);
+		return new DataResponse($result);
+	}
 }

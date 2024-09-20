@@ -21,25 +21,23 @@
  *
  */
 
-namespace OCA\Survey_Server\Service;
+namespace OCA\SurveyServer\Service;
 
-use OCP\IConfig;
+use OCP\IAppConfig;
 
-class SettingsService
-{
-    /** @var IConfig */
-    protected IConfig $config;
+class SettingsService {
+	/** @var IAppConfig */
+	protected IAppConfig $config;
 
-    /**
-     * @param IConfig $config
-     */
-    public function __construct(IConfig $config)
-    {
-        $this->config = $config;
-    }
+	/**
+	 * @param IAppConfig $config
+	 */
+	public function __construct(IAppConfig $config) {
+		$this->config = $config;
+	}
 
-    public function update(int $time): int {
-        $this->config->setAppValue('survey_server', 'deletion_time', $time);
-        return $time;
-    }
+	public function update(int $time): int {
+		$this->config->setValueString('survey_server', 'deletion_time', $time);
+		return $time;
+	}
 }

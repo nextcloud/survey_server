@@ -95,20 +95,20 @@
 				    $prevValue = $i > 0 ? $data[$dataKeys[$i - 1]] : null;
 					$nextValue = $i + 1 < $dataCount ? $data[$dataKeys[$i + 1]] : null;
 
-				    if ($value['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION
+				    if ($value['presentation'] === \OCA\SurveyServer\EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION
                         && ($prevValue === null
-                        || $prevValue['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM)){
+                        || $prevValue['presentation'] === \OCA\SurveyServer\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM)){
                         // draw a table header because its the first numerical numbers ?>
                         <table><thead><tr><th></th><th>Average</th><th>Largest</th></tr></thead><tbody>
                     <?php }
 
-					if ($value['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION) { ?>
+					if ($value['presentation'] === \OCA\SurveyServer\EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION) { ?>
                         <tr>
                             <td><?php p(($value['description'])); ?></td>
                             <td id="<?php p($category . $key . 'NumericAverage'); ?>"><span></span></td>
                             <td id="<?php p($category . $key . 'NumericMax'); ?>"><span></span></td>
                         </tr>
-					<?php } else if ($value['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) { ?>
+					<?php } else if ($value['presentation'] === \OCA\SurveyServer\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) { ?>
                             <div class="chart">
                                 <h2><?php p(($value['description'])); ?></h2>
 
@@ -121,7 +121,7 @@
                             </div>
 					<?php }
 
-					if ($nextValue === null || $nextValue['presentation'] === \OCA\Survey_Server\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) { ?>
+					if ($nextValue === null || $nextValue['presentation'] === \OCA\SurveyServer\EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) { ?>
                         </tbody>
                         </table>
 					<?php }
