@@ -23,19 +23,6 @@
 
     $(document).ready(function () {
 
-        /**
-         * calculate random color for the charts
-         * @returns {string}
-         */
-        let getRandomColor = function () {
-            let letters = '0123456789ABCDEF'.split('');
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        };
-
         let formatNumber = function (number) {
             number = number.toString();
             return number.replace(/(\d)(?=(\d{3})+(\.|$))/g, '$1,');
@@ -49,16 +36,16 @@
          * @param lastUpdate
          */
         let showGeneralStatistics = function (instances, users, files, lastUpdate) {
-            $('#instances span').text(formatNumber(instances));
-            $('#lastUpdate span').text(formatNumber(lastUpdate));
-            $('#maxUsers span').text(formatNumber(users['max']));
-            $('#minUsers span').text(formatNumber(users['min']));
-            $('#averageUsers span').text(formatNumber(users['average']));
-            $('#totalUsers span').text(formatNumber(users['total']));
-            $('#maxFiles span').text(formatNumber(files['max']));
-            $('#minFiles span').text(formatNumber(files['min']));
-            $('#averageFiles span').text(formatNumber(files['average']));
-            $('#totalFiles span').text(formatNumber(files['total']));
+            document.querySelector('#instances span').textContent = formatNumber(instances);
+            document.querySelector('#lastUpdate span').textContent = formatNumber(lastUpdate);
+            document.querySelector('#maxUsers span').textContent = formatNumber(users['max']);
+            document.querySelector('#minUsers span').textContent = formatNumber(users['min']);
+            document.querySelector('#averageUsers span').textContent = formatNumber(users['average']);
+            document.querySelector('#totalUsers span').textContent = formatNumber(users['total']);
+            document.querySelector('#maxFiles span').textContent = formatNumber(files['max']);
+            document.querySelector('#minFiles span').textContent = formatNumber(files['min']);
+            document.querySelector('#averageFiles span').textContent = formatNumber(files['average']);
+            document.querySelector('#totalFiles span').textContent = formatNumber(files['total']);
         };
 
         /**
@@ -68,15 +55,11 @@
          */
         let ocNumericStatistics = function (id, data) {
             if (id.substring(0, 3) === 'php' || id.substring(0, 8) === 'database') {
-                $('#' + id + 'Max span').text(OC.Util.humanFileSize(data['max']));
-                //$('#' + id + 'Min span').text(OC.Util.humanFileSize(data['min']));
-                $('#' + id + 'Average span').text(OC.Util.humanFileSize(data['average']));
-                //$('#' + id + 'Total span').text(OC.Util.humanFileSize(data['total']));
+                document.querySelector('#' + id + 'Max span').textContent = OC.Util.humanFileSize(data['max']);
+                document.querySelector('#' + id + 'Average span').textContent = OC.Util.humanFileSize(data['average']);
             } else {
-                $('#' + id + 'Max span').text(formatNumber(data['max']));
-                //$('#' + id + 'Min span').text(formatNumber(data['min']));
-                $('#' + id + 'Average span').text(formatNumber(data['average']));
-                //$('#' + id + 'Total span').text(formatNumber(data['total']));
+                document.querySelector('#' + id + 'Max span').textContent = formatNumber(data['max']);
+                document.querySelector('#' + id + 'Average span').textContent = formatNumber(data['average']);
             }
         };
 
@@ -89,10 +72,14 @@
             let appLabels = [],
                 appValues = [],
                 numApps = 0,
-                $details = $('#appDetails');
+                details = document.querySelector('#appDetails');
             for (let key in data) {
-                $details.append($('<span>').text(key + ': ' + data[key]));
-                $details.append($('<br>'));
+                var span = document.createElement('span');
+                span.textContent = key + ': ' + data[key];
+                details.appendChild(span);
+
+                var br = document.createElement('br');
+                details.appendChild(br);
 
                 if (numApps < 75) {
                     appLabels.push(key);
@@ -119,7 +106,7 @@
                 options: {
                     plugins: {
                         legend: {
-                            display: true
+                            display: false
                         }
                     }
                 }
@@ -136,14 +123,18 @@
             let chartLabels = [];
             let data = [];
             let backgroundColor = [];
-            let $details = $('#' + id + 'Details'); // text output
+            let details = document.querySelector('#' + id + 'Details');
             let colors = ["#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5"];
             let counter = 0;
 
             for (let key in rawdata) {
                 let colorIndex = counter - (Math.floor(counter / colors.length) * colors.length)
-                $details.append($('<span>').text(key + ': ' + rawdata[key]));
-                $details.append($('<br>'));
+                var span = document.createElement('span');
+                span.textContent = key + ': ' + rawdata[key];
+                details.appendChild(span);
+
+                var br = document.createElement('br');
+                details.appendChild(br);
 
                 chartLabels.push(key);
                 data.push(rawdata[key]);

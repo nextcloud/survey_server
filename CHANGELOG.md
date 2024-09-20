@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.0.0 - 2023-04-30
+## 1.0.0 - 2024-09-20
 ### Added
-- NC25 compatibility
+- NC29 compatibility
 - store and show last update in dashboard
 - automated data cleanup and performance optimization
 - Admin settings
