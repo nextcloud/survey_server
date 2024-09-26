@@ -1,12 +1,8 @@
 /**
- * Survey Server
- *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the LICENSE.md file.
- *
- * @author Marcel Scherello <surveyserver@scherello.de>
- * @copyright 2023 Marcel Scherello
+ * SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+
 'use strict';
 
 document.addEventListener('DOMContentLoaded', function () {

@@ -10,7 +10,7 @@
     <namespace>SurveyServer</namespace>
     <category>other</category>
     <dependencies>
-        <nextcloud min-version="25" max-version="99"/>
+        <nextcloud min-version="25" max-version="29"/>
     </dependencies>
     <settings>
         <admin-section>OCA\SurveyServer\Settings\AdminSection</admin-section>
