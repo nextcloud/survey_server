@@ -7,7 +7,6 @@
 
 namespace OCA\SurveyServer\BackgroundJobs;
 
-use OCA\Analytics\Service\DataloadService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCA\SurveyServer\EvaluateStatistics;

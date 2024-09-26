@@ -43,7 +43,6 @@ class ApiController extends \OCP\AppFramework\ApiController {
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
-	 * @PublicPage
 	 *
 	 * @param string $data
 	 * @return DataResponse
