@@ -187,5 +187,11 @@
     "type" : "bool",
     "presentation" : "diagram",
     "description" : "Default Encryption Module Enabled"
+  },
+  "loaded_extensions" : {
+    "type" : "string",
+    "presentation" : "diagram",
+    "description" : "loaded_extensions"
   }
+
 }

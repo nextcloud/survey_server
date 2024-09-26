@@ -5,13 +5,27 @@
     <description>Collects information from other Nextcloud servers about enabled apps, settings, etc and visualize them</description>
     <licence>AGPL</licence>
     <author>Bjoern Schiessle</author>
-    <version>0.1.5</version>
-    <namespace>Survey_Server</namespace>
+    <author>Marcel Scherello</author>
+    <version>1.0.0</version>
+    <namespace>SurveyServer</namespace>
     <category>other</category>
     <dependencies>
-        <nextcloud min-version="9" max-version="14"/>
+        <nextcloud min-version="25" max-version="29"/>
     </dependencies>
+    <settings>
+        <admin-section>OCA\SurveyServer\Settings\AdminSection</admin-section>
+        <admin>OCA\SurveyServer\Settings\Admin</admin>
+    </settings>
     <background-jobs>
-        <job>OCA\Survey_Server\BackgroundJobs\ComputeStatistics</job>
+        <job>OCA\SurveyServer\BackgroundJobs\ComputeStatistics</job>
     </background-jobs>
+    <navigations>
+        <navigation>
+            <id>survey_server</id>
+            <name>Survey</name>
+            <route>survey_server.page.index</route>
+            <icon>app.svg</icon>
+            <order>10</order>
+        </navigation>
+    </navigations>
 </info>

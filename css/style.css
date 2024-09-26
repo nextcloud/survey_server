@@ -1,3 +1,9 @@
+/**
+ * SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-FileCopyrightText: 2016 ownCloud, Inc.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 #surveyResults {
 	color: #555;
 	padding: 20px;
@@ -5,26 +11,60 @@
 
 #surveyResults .chart {
 	float: left;
-	padding: 50px;
+	padding: 25px;
 }
 
 #surveyResults .section-stats {
 	clear: both;
+	display: flex;
+	flex-wrap: wrap; /* Allows the items to wrap to the next line */
+	gap: 10px;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-bottom: 30px;
 }
 
 #surveyResults h1 {
 	font-size: 25px;
-	margin-bottom: 20px;
 	font-weight: normal;
+	padding-bottom: 10px;
 }
 
 #surveyResults h2 {
-	font-size: 20px;
+	font-size: 17px;
 	margin-bottom: 20px;
 	font-weight: normal;
+	max-width: 200px;
+	white-space: nowrap; /* Prevent the text from wrapping onto multiple lines */
+	overflow: hidden; /* Hide any text that goes beyond the max-width */
+	text-overflow: ellipsis; /* Adds "..." at the cutoff point */
+
 }
 #surveyResults h3 {
 	font-size: 15px;
 	font-weight: normal;
 	margin: 20px 0;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+th, td {
+	width: 200px;
+	text-align: center;
+	border: 1px solid #ddd;
+	padding: 8px;
+}
+th {
+	background-color: #f2f2f2;
+}
+
+#app-navigation > ul {
+	padding: 30px;
+}
+
+#app-navigation li {
+	margin-bottom: 8px;
+	font-size: 17px;
 }
