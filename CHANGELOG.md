@@ -1,7 +1,9 @@
 # Changelog
 
+## 1.1.0 - 2024-09-27
 ### Changed
-- Just show top 5 in charts
+- aggregate very old server versions to minor version
+- display only top 5 in charts
 
 ## 1.0.0 - 2024-09-20
 ### Added
