@@ -31,10 +31,11 @@ class SettingsController extends Controller {
 	 * update settings
 	 *
 	 * @NoAdminRequired
-	 * @param int $time
+	 * @param int $deletion_time
+	 * @param int $version_aggregation
 	 * @return DataResponse
 	 */
-	public function update(int $time): DataResponse {
-		return new DataResponse($this->SettingsService->update($time));
+	public function update(int $deletion_time, int $version_aggregation): DataResponse {
+		return new DataResponse($this->SettingsService->update($deletion_time, $version_aggregation));
 	}
 }
