@@ -1,5 +1,8 @@
 # Changelog
 
+### Changed
+- Just show top 5 in charts
+
 ## 1.0.0 - 2024-09-20
 ### Added
 - NC29 compatibility
