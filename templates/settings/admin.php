@@ -14,6 +14,9 @@ script('survey_server', 'settings/admin');
         <label for="deletion_time">Data older than x years will be deleted with every statistic run:</label><br>
         <input type="text" id="deletion_time" value="<?php p($_['deletion_time']); ?>"/>
         <br><br>
+        <label for="version_aggregation">Nextcloud versions below x will be aggregated to the minor version:</label><br>
+        <input type="text" id="version_aggregation" value="<?php p($_['version_aggregation']); ?>"/>
+        <br><br>
         <button id="surveyYearsSave">Save</button>
     </div>
 
