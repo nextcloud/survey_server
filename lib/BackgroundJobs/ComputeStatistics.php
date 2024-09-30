@@ -68,6 +68,9 @@ class ComputeStatistics extends TimedJob {
 		$this->logger->info('computing apps');
 		$newResult['apps'] = $this->getApps();
 
+		$this->logger->info('computing max instances');
+		$newResult['max'] = $this->getInstanceMaxUser();
+
 		$this->config->setValueString('survey_server', 'evaluated_statistics', json_encode($newResult));
 		$this->logger->info('computing done');
 	}
@@ -297,6 +300,21 @@ class ComputeStatistics extends TimedJob {
 		return $statistics;
 	}
 
+	private function getInstanceMaxUser() {
+		$query = $this->connection->getQueryBuilder();
+		$result = $query->select('source')
+						->from($this->table)
+						->where($query->expr()->eq('category', $query->createNamedParameter('stats')))
+						->andWhere($query->expr()->eq('key', $query->createNamedParameter('num_users')))
+						->orderBy('value', 'DESC')
+						->setMaxResults(5)
+						->executeQuery();
+
+		$top5Ids = $result->fetchAll();
+		$result->closeCursor();
+
+		return $top5Ids;
+	}
 
 	/**
 	 * @throws Exception
