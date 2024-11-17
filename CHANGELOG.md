@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 - 2024-09-27
+### Changed
+- aggregate very old server versions to minor version
+- display only top 5 in charts
+
 ## 1.0.0 - 2024-09-20
 ### Added
 - NC29 compatibility
