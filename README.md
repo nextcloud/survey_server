@@ -1,5 +1,7 @@
 # Survey Server
 
+[![REUSE status](https://api.reuse.software/badge/github.com/nextcloud/survey_server)](https://api.reuse.software/info/github.com/nextcloud/survey_server)
+
 This is the survey server app. It collects anonymised
 data send by other Nextcloud installations, evaluates them and visualize it.
 
