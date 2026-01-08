@@ -44,7 +44,7 @@ class ComputeStatistics extends TimedJob {
 		$this->connection = $connection ? $connection : \OC::$server->getDatabaseConnection();
 		$this->config = $config = $config ? $config : \OC::$server->getConfig();
 		$this->EvaluateStatistics = $EvaluateStatistics ? $EvaluateStatistics : new EvaluateStatistics();
-		$this->setInterval(60 * 60); //todo
+		$this->setInterval(60); //todo
 	}
 
 	/**
@@ -67,6 +67,9 @@ class ComputeStatistics extends TimedJob {
 
 		$this->logger->info('computing apps');
 		$newResult['apps'] = $this->getApps();
+
+		$this->logger->info('computing max instances');
+		$newResult['max'] = $this->getInstanceMaxUser();
 
 		$this->config->setValueString('survey_server', 'evaluated_statistics', json_encode($newResult));
 		$this->logger->info('computing done');
@@ -205,35 +208,12 @@ class ComputeStatistics extends TimedJob {
 	}
 
 	private function clearValue($category, $key, $value): string {
-		if (strpos($key, 'memcache.') === 0) {
+		if ($category === 'server' && strpos($key, 'memcache.') === 0) {
 			return $value !== '' ? trim($value, '\\') : 'none';
 		}
 
 		if ($key === 'version') {
-			$version = explode('.', $value);
-			$majorMinorVersion = $version[0] . '.' . (int)$version[1];
-
-			if ($category === 'server') {
-				return $majorMinorVersion . '.' . $version[2];
-			}
-
-			if ($category === 'database') {
-				switch ($version[0]) {
-					case '2':
-					case '3':
-						return 'SQLite ' . $majorMinorVersion;
-					case '5':
-					case '6':
-						return 'MySQL ' . $majorMinorVersion;
-					case '10':
-					case '11':
-						return 'MariaDB ' . $majorMinorVersion;
-					default:
-						return $majorMinorVersion;
-				}
-			}
-
-			return $majorMinorVersion;
+			return $this->clearVersionValue($category, $value);
 		}
 
 		if ($key === 'max_execution_time') {
@@ -241,6 +221,46 @@ class ComputeStatistics extends TimedJob {
 		}
 
 		return (string)$value;
+	}
+
+	private function clearVersionValue($category, $value): string {
+		$versionAggregation = $this->config->getValueString('survey_server', 'version_aggregation', '25');
+
+		$version = explode('.', $value);
+		$majorMinorVersion = $version[0] . '.' . (int)$version[1];
+
+		if ($category === 'server') {
+			if ($version[0] < $versionAggregation) {
+				// for old versions, we aggregate to minor only
+				$version[2] = 'x';
+			}
+			return $majorMinorVersion . '.' . $version[2];
+		}
+
+		if ($category === 'database') {
+			return $this->clearDatabaseVersion($version[0], $majorMinorVersion);
+		}
+
+		return $majorMinorVersion;
+	}
+
+	private function clearDatabaseVersion($majorVersion, $majorMinorVersion): string {
+		switch ($majorVersion) {
+			case '2':
+			case '3':
+				return 'SQLite ' . $majorMinorVersion;
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				return 'MySQL ' . $majorMinorVersion;
+			case '10':
+			case '11':
+				return 'MariaDB ' . $majorMinorVersion;
+			default:
+				return $majorMinorVersion;
+		}
 	}
 
 
@@ -280,6 +300,21 @@ class ComputeStatistics extends TimedJob {
 		return $statistics;
 	}
 
+	private function getInstanceMaxUser() {
+		$query = $this->connection->getQueryBuilder();
+		$result = $query->select('source')
+						->from($this->table)
+						->where($query->expr()->eq('category', $query->createNamedParameter('stats')))
+						->andWhere($query->expr()->eq('key', $query->createNamedParameter('num_users')))
+						->orderBy('value', 'DESC')
+						->setMaxResults(5)
+						->executeQuery();
+
+		$top5Ids = $result->fetchAll();
+		$result->closeCursor();
+
+		return $top5Ids;
+	}
 
 	/**
 	 * @throws Exception

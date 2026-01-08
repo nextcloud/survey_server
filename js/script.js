@@ -112,19 +112,29 @@
             let colors = ["#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5"];
             let counter = 0;
 
-            for (let key in rawdata) {
-                let colorIndex = counter - (Math.floor(counter / colors.length) * colors.length)
-                var span = document.createElement('span');
-                span.textContent = key + ': ' + rawdata[key];
-                details.appendChild(span);
+            // Convert rawdata to an array of [key, value] pairs and sort by value in descending order
+            let sortedData = Object.entries(rawdata).sort((a, b) => b[1] - a[1]);
 
-                var br = document.createElement('br');
-                details.appendChild(br);
+            // Extract top 5 values and aggregate the rest
+            let topData = sortedData.slice(0, 5);
+            let othersData = sortedData.slice(5);
 
+            // Calculate the sum of the remaining values
+            let othersSum = othersData.reduce((sum, item) => sum + item[1], 0);
+
+            // Add top 5 values to chart data
+            topData.forEach(([key, value]) => {
                 chartLabels.push(key);
-                data.push(rawdata[key]);
-                backgroundColor.push(colors[colorIndex]);
+                data.push(value);
+                backgroundColor.push(colors[counter % colors.length]);
                 counter++;
+            });
+
+            // Add "Others" category if there are remaining values
+            if (othersSum > 0) {
+                chartLabels.push('Others');
+                data.push(othersSum);
+                backgroundColor.push(colors[counter % colors.length]);
             }
 
             let chartData = {
@@ -146,6 +156,16 @@
                         }
                     }
                 }
+            });
+
+            // List all values in the details section
+            Object.entries(rawdata).forEach(([key, value]) => {
+                var span = document.createElement('span');
+                span.textContent = key + ': ' + value;
+                details.appendChild(span);
+
+                var br = document.createElement('br');
+                details.appendChild(br);
             });
         };
 
