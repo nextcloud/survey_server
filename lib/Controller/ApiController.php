@@ -12,6 +12,12 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\DB\Exception;
 use OCP\IRequest;
 
+/**
+ * Authenticated app API endpoints.
+ *
+ * These routes are consumed as API calls, not browser form submissions. They
+ * intentionally extend Nextcloud's ApiController and opt out of CSRF checks.
+ */
 class ApiController extends \OCP\AppFramework\ApiController {
 	private StatisticService $StatisticService;
 
@@ -49,7 +55,6 @@ class ApiController extends \OCP\AppFramework\ApiController {
 	 * @throws Exception
 	 */
 	public function add(string $data) {
-		$params = $this->request->getParams();
 		$array = json_decode($data, true);
 		$result = $this->StatisticService->add($array);
 		return new DataResponse($result);
