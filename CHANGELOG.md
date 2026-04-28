@@ -4,6 +4,9 @@
 ### Changed
 - hardening of admin settings
 
+### Added
+- AGENTS.md
+
 ## 1.1.0 - 2024-09-27
 ### Changed
 - aggregate very old server versions to minor version
