@@ -11,6 +11,7 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCA\SurveyServer\EvaluateStatistics;
 use OCP\DB\Exception;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IAppConfig;
 use OCP\IDBConnection;
 use Psr\Log\LoggerInterface;
@@ -94,32 +95,27 @@ class ComputeStatistics extends TimedJob {
 	 * @throws Exception
 	 */
 	private function getStatisticsOfCategories(): array {
-		$categories = $this->getCategories();
+		$statisticsKeys = $this->getStatisticsKeys();
+		$diagramStatistics = $this->getDiagramStatistics($statisticsKeys['diagram']);
+		$numericalStatistics = $this->getNumericalStatistics($statisticsKeys['numerical']);
+
 		$result = [];
-		foreach ($categories as $category) {
-			if ($category !== 'apps') {
-				$keys = $this->getKeysOfCategory($category);
-				foreach ($keys as $key) {
-					// we don't evaluate share permissions for now
-					if (strpos($key, 'permissions_') === 0) continue;
-					$presentationType = $this->EvaluateStatistics->getPresentationType($key);
-					switch ($presentationType) {
-						case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
-							$result[$category][$key]['statistics'] = $this->getStatisticsDiagram($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->EvaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
-							$result[$category][$key]['statistics'] = $this->getNumericalEvaluatedStatistics($category, $key);
-							$result[$category][$key]['presentation'] = $presentationType;
-							$result[$category][$key]['description'] = $this->EvaluateStatistics->getDescription($key);
-							break;
-						case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
-							break;
-						default:
-							throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
-					}
+		foreach ($statisticsKeys['metadata'] as $category => $keys) {
+			foreach ($keys as $key => $metadata) {
+				if ($metadata['presentation'] === EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) {
+					$statistics = $diagramStatistics[$category][$key] ?? [];
+				} else {
+					$statistics = $numericalStatistics[$category][$key] ?? [
+						'average' => 0,
+						'max' => null,
+						'min' => null,
+						'total' => null,
+					];
 				}
+
+				$result[$category][$key]['statistics'] = $statistics;
+				$result[$category][$key]['presentation'] = $metadata['presentation'];
+				$result[$category][$key]['description'] = $metadata['description'];
 			}
 		}
 
@@ -127,82 +123,134 @@ class ComputeStatistics extends TimedJob {
 	}
 
 	/**
-	 * get all categories
-	 *
-	 * @return array
+	 * @return array{metadata: array<string, array<string, array{presentation: string, description: string}>>, diagram: string[], numerical: string[]}
 	 * @throws Exception
 	 */
-	private function getCategories(): array {
-		$getCategories = $this->connection->getQueryBuilder();
-		$getCategories->selectDistinct('category')->from($this->table);
-		$result = $getCategories->executeQuery();
-		$categories = $result->fetchAll();
-		$result->closeCursor();
-
-		return array_map(function ($array) {
-			return $array['category'];
-		}, $categories);
-	}
-
-	/**
-	 * get all keys of a given category
-	 *
-	 * @param string $category
-	 * @return array
-	 * @throws Exception
-	 */
-	private function getKeysOfCategory(string $category): array {
-		$getKeys = $this->connection->getQueryBuilder();
-		$getKeys->selectDistinct('key')->from($this->table)->where($getKeys->expr()
-																		   ->eq('category', $getKeys->createNamedParameter($category)));
-		$result = $getKeys->executeQuery();
-		$keys = $result->fetchAll();
-		$result->closeCursor();
-
-		return array_map(function ($array) {
-			return $array['key'];
-		}, $keys);
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	private function getStatisticsDiagram($category, $key): array {
+	private function getStatisticsKeys(): array {
 		$query = $this->connection->getQueryBuilder();
-		$result = $query->select('value')->selectAlias($query->func()->count('source'), 'count')->from($this->table)
-						->where($query->expr()->eq('category', $query->createNamedParameter($category)))
-						->andWhere($query->expr()->eq('key', $query->createNamedParameter($key)))->addGroupBy('value')
+		$cursor = $query->selectDistinct('category', 'key')
+						->from($this->table)
+						->where($query->expr()->neq('category', $query->createNamedParameter('apps')))
+						->executeQuery();
+		$rows = $cursor->fetchAll();
+		$cursor->closeCursor();
+
+		$metadata = [];
+		$diagram = [];
+		$numerical = [];
+		foreach ($rows as $row) {
+			$category = $row['category'];
+			$key = $row['key'];
+
+			// we don't evaluate share permissions for now
+			if (strpos($key, 'permissions_') === 0) continue;
+
+			$presentationType = $this->EvaluateStatistics->getPresentationType($key);
+			switch ($presentationType) {
+				case EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM:
+				case EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION:
+					$metadata[$category][$key] = [
+						'presentation' => $presentationType,
+						'description' => $this->EvaluateStatistics->getDescription($key),
+					];
+					break;
+				case EvaluateStatistics::PRESENTATION_TYPE_VALUE:
+					continue 2;
+				default:
+					throw new \BadMethodCallException('unknown presentation type: ' . $presentationType);
+			}
+
+			if ($presentationType === EvaluateStatistics::PRESENTATION_TYPE_NUMERICAL_EVALUATION) {
+				$numerical[$key] = $key;
+			} elseif ($presentationType === EvaluateStatistics::PRESENTATION_TYPE_DIAGRAM) {
+				$diagram[$key] = $key;
+			}
+		}
+
+		return [
+			'metadata' => $metadata,
+			'diagram' => array_values($diagram),
+			'numerical' => array_values($numerical),
+		];
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	private function getDiagramStatistics(array $keys): array {
+		if ($keys === []) {
+			return [];
+		}
+
+		$query = $this->connection->getQueryBuilder();
+		$result = $query->select('category', 'key', 'value')
+						->selectAlias($query->func()->count('source'), 'count')
+						->from($this->table)
+						->where($query->expr()->in('key', $query->createNamedParameter($keys, IQueryBuilder::PARAM_STR_ARRAY)))
+						->andWhere($query->expr()->neq('category', $query->createNamedParameter('apps')))
+						->addGroupBy('category')
+						->addGroupBy('key')
+						->addGroupBy('value')
 						->executeQuery();
 		$values = $result->fetchAll();
 		$result->closeCursor();
 
 		$statistics = [];
 		foreach ($values as $value) {
+			$category = $value['category'];
+			$key = $value['key'];
 			$name = $this->clearValue($category, $key, $value['value']);
-			if (isset($statistics[$name])) {
-				$statistics[$name] = $statistics[$name] + $value['count'];
+			if (isset($statistics[$category][$key][$name])) {
+				$statistics[$category][$key][$name] = $statistics[$category][$key][$name] + $value['count'];
 			} else {
-				$statistics[$name] = $value['count'];
+				$statistics[$category][$key][$name] = $value['count'];
 			}
 		}
-		arsort($statistics, SORT_NUMERIC);
+
+		foreach ($statistics as $category => $keys) {
+			foreach ($keys as $key => $keyStatistics) {
+				arsort($keyStatistics, SORT_NUMERIC);
+				$statistics[$category][$key] = $keyStatistics;
+			}
+		}
+
 		return $statistics;
 	}
 
 	/**
 	 * @throws Exception
 	 */
-	private function getNumericalEvaluatedStatistics($category, $key) {
+	private function getNumericalStatistics(array $keys): array {
+		if ($keys === []) {
+			return [];
+		}
+
 		$query = $this->connection->getQueryBuilder();
-		$result = $query->select($query->createFunction('AVG(CAST(`value` AS int)) AS average, MAX(CAST(`value` AS int)) AS max, MIN(CAST(`value` AS int)) AS min'))
-						->addSelect($query->createFunction('SUM(CAST(`value` AS int)) AS total'))->from($this->table)
-						->where($query->expr()->eq('key', $query->createNamedParameter($key)))->andWhere($query->expr()
-																											   ->eq('category', $query->createNamedParameter($category)))
+		$result = $query->select('category', 'key')
+						->selectAlias($query->createFunction('AVG(CAST(`value` AS int))'), 'average')
+						->selectAlias($query->createFunction('MAX(CAST(`value` AS int))'), 'max')
+						->selectAlias($query->createFunction('MIN(CAST(`value` AS int))'), 'min')
+						->selectAlias($query->createFunction('SUM(CAST(`value` AS int))'), 'total')
+						->from($this->table)
+						->where($query->expr()->in('key', $query->createNamedParameter($keys, IQueryBuilder::PARAM_STR_ARRAY)))
+						->andWhere($query->expr()->neq('category', $query->createNamedParameter('apps')))
+						->addGroupBy('category')
+						->addGroupBy('key')
 						->executeQuery();
 		$data = $result->fetchAll();
-		$data[0]['average'] = round((float)$data[0]['average'], 2);
-		$statistics = $data[0];
 		$result->closeCursor();
+
+		$statistics = [];
+		foreach ($data as $row) {
+			$category = $row['category'];
+			$key = $row['key'];
+			$statistics[$category][$key] = [
+				'average' => round((float)$row['average'], 2),
+				'max' => $row['max'],
+				'min' => $row['min'],
+				'total' => $row['total'],
+			];
+		}
 
 		return $statistics;
 	}

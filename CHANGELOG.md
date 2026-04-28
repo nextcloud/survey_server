@@ -3,6 +3,9 @@
 ## 1.2.0 - 2026-05-xx
 ### Changed
 - hardening of admin settings
+- safety DB rollback for failed DB updates
+- Fix max-user sort order
+- Reduce aggregation scans
 
 ### Added
 - AGENTS.md
