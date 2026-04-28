@@ -19,8 +19,9 @@ class SettingsService {
 		$this->config = $config;
 	}
 
-	public function update(int $time): int {
-		$this->config->setValueString('survey_server', 'deletion_time', $time);
-		return $time;
+	public function update(int $deletion_time, int $version_aggregation): int {
+		$this->config->setValueString('survey_server', 'deletion_time', $deletion_time);
+		$this->config->setValueString('survey_server', 'version_aggregation', $version_aggregation);
+		return $deletion_time;
 	}
 }
