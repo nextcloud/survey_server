@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 - 2026-05-xx
+### Changed
+- hardening of admin settings
+
 ## 1.1.0 - 2024-09-27
 ### Changed
 - aggregate very old server versions to minor version

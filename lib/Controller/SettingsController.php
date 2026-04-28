@@ -30,7 +30,6 @@ class SettingsController extends Controller {
 	/**
 	 * update settings
 	 *
-	 * @NoAdminRequired
 	 * @param int $deletion_time
 	 * @param int $version_aggregation
 	 * @return DataResponse
