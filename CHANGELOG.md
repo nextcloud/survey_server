@@ -6,6 +6,7 @@
 - safety DB rollback for failed DB updates
 - Fix max-user sort order
 - Reduce aggregation scans
+- Fix missing rollback
 
 ### Added
 - AGENTS.md

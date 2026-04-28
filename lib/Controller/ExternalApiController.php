@@ -14,7 +14,6 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
 class ExternalApiController extends OCSController {
-
 	/** @var StatisticService */
 	private $service;
 
@@ -39,21 +38,27 @@ class ExternalApiController extends OCSController {
 	 *
 	 * @NoCSRFRequired
 	 * @PublicPage
+	 * @AnonRateThrottle(limit=20, period=60)
 	 *
 	 * @param string $data
 	 * @return DataResponse
 	 */
 	public function receiveSurveyResults(string $data) {
-
 		$array = json_decode($data, true);
+		if ($array === null) {
+			return new DataResponse(['message' => 'Invalid data supplied.'], Http::STATUS_BAD_REQUEST);
+		}
+
+		try {
+			StatisticService::validateData($array);
+		} catch (\InvalidArgumentException $e) {
+			return new DataResponse(['message' => 'Invalid data supplied.'], Http::STATUS_BAD_REQUEST);
+		}
+
 		$array['timestamp'] = time();
 		$logFile = \OC::$server->getConfig()
 							   ->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/survey.log';
 		file_put_contents($logFile, json_encode($array) . PHP_EOL, FILE_APPEND);
-
-		if ($array === null) {
-			return new DataResponse(['message' => 'Invalid data supplied.'], Http::STATUS_BAD_REQUEST);
-		}
 
 		try {
 			$this->service->add($array);
